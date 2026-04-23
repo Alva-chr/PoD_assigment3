@@ -20,10 +20,26 @@ int main(int argc, char **argv) {
 	int rank, size;
 	MPI_Status status;
 
+	double *input = NULL; //So that each process 
+	int num_values;
+
+	//Only the the process with rank 0 will read in the full input file
+	if(rank == root){
+		if (0 > (num_values = read_input(input_name, &input))) {
+			return 2;
+		}
+	}
+
+	int elements_per_process = num_values/size;
+
     //Setting up MPI
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	MPI_Bcast(&elements_per_process, 1, MPI_INT, root, MPI_COMM_WORLD);
+
+	
 
 
     double start = MPI_Wtime();
