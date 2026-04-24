@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
 	}
 
 	int elements_per_process = num_values/size;
+	int *process_memory;
 
     //Setting up MPI
 	MPI_Init(&argc, &argv);
@@ -39,9 +40,15 @@ int main(int argc, char **argv) {
 
 	MPI_Bcast(&elements_per_process, 1, MPI_INT, root, MPI_COMM_WORLD);
 
-	
+	//Allocating memory for each process
+	if (NULL == (process_memory = malloc(elements_per_process* sizeof(int)))) {
+		perror("Couldn't allocate memory for output");
+		return 2;
+	}
 
+	MPI_Scatter(input, elements_per_process, MPI_INT, process_memory, elements_per_process, MPI_INT, root, MPI_COMM_WORLD);
 
+	MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
 
     //lägg till kod för att lösa problemet här
@@ -58,6 +65,7 @@ int main(int argc, char **argv) {
     MPI_Finalize(); 
 }
 
+//Taken from assignment 2
 int read_input(const char *file_name, double **values) {
 	FILE *file;
 	if (NULL == (file = fopen(file_name, "r"))) {
