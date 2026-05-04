@@ -156,11 +156,40 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
 }
 
 void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
-
+    int n = n1 + n2;
+    int i;
+    int i1 = 0;
+    int i2 = 0;
+    for (i; i < n; i++){
+        if (v1[i1] > v2[i2]){
+            result[i] = v1[i1];
+            i1++;
+        }
+        else if(v1[i1] == v2[i2]){
+            result[i] = v1[i1];
+            i1++;
+        }
+        else{
+            result[i] = v2[i2];
+            i2++;
+        }
+    }
+    return *result;
 }
 
 int sorted_ascending(int *elements, int n){
-
+    int i;
+    int res = 1;
+    for (i=0; i<n; i++){
+        if (elements[i+1] < elements[i]){
+            ;
+        }
+        else{
+            res = 0;
+            printf("ERROR: Element %d with index %d is not smaller than element %d with index %d", elements[i], i, elements[i+1], i+1);
+        }
+    }
+    return res;
 }
 
 void swap(int *e1, int *e2){
