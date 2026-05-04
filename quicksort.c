@@ -2,6 +2,7 @@
 #include "pivot.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 
 int main(int argc, char **argv) {
@@ -53,6 +54,8 @@ int main(int argc, char **argv) {
 	}
 
 	distribute_from_root(input, elements_per_process, process_memory);
+
+
 
 	MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
