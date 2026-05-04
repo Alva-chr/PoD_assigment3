@@ -128,8 +128,8 @@ int distribute_from_root(int *all_elements, int n, int **my_elements){
 	MPI_Scatter(input, elements_per_process, MPI_INT, process_memory, elements_per_process, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
-void gather_on_root(int *all_elements, int *my_elements, int local_n){
-
+void gather_on_root(&output, &process_memory, elements_per_process){
+    MPI_Gather(process_memory, elements_per_process, MPI_INT, output, elements_per_process, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
 int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
@@ -181,5 +181,5 @@ int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
 }
 
 int select_pivot_smallest_root(int *elements, int n, MPI_Comm communicator){
-	
+
 }
