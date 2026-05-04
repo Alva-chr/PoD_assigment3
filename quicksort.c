@@ -169,15 +169,42 @@ void swap(int *e1, int *e2){
 }
 
 int compare(const void *v1, const void *v2){
-
+    int res;
+    if (*v1 == *v2){
+        res = 0;
+    }
+    else if (*v1 > *v2){
+        res = 1;
+    }
+    else{
+        res = -1;
+    }
+    return res;
 }
 
 int get_larger_index(int *elements, int n, int val){
-
+    int index = 0;
+    int i;
+    for (i = 0; i < n; i++){
+        if (elements[i] > val){
+            break
+        }
+        index++;
+    }
+    return index;
 }
 
 int get_median(int *elements, int n){
-
+    int median;
+    if (n%2 == 0){ //if dividable by two
+        int el1 = elements[n/2-1];
+        int el2 = elements[n/2];
+        median = (el1 + el2)/2;
+    }
+    else{
+        median = elements[n/2];
+    }
+    return median;
 }
 
 int select_pivot(int pivot_strategy, int *elements, int n, MPI_Comm communicator){
