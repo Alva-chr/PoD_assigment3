@@ -20,12 +20,18 @@ int main(int argc, char **argv) {
 	int rank, size;
 	MPI_Status status;
 
-	double *input = NULL; //So that each process 
+	int *input = NULL; //So that each process 
+	int *output = NULL;
 	int num_values;
 
 	//Only the the process with rank 0 will read in the full input file
 	if(rank == root){
 		if (0 > (num_values = read_input(input_name, &input))) {
+			perror("Couldn't read input");
+			return 2;
+		}
+		if (NULL == (output = malloc(num_values*sizeof(int)))) {
+			perror("Couldn't allocate memory for output");
 			return 2;
 		}
 	}
@@ -42,7 +48,7 @@ int main(int argc, char **argv) {
 
 	//Allocating memory for each process
 	if (NULL == (process_memory = malloc(elements_per_process* sizeof(int)))) {
-		perror("Couldn't allocate memory for output");
+		perror("Couldn't allocate memory for process memory");
 		return 2;
 	}
 
