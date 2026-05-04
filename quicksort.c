@@ -121,15 +121,31 @@ int write_output(char *file_name, const double *output, int num_values) {
 }
 
 int check_and_print(int *elements, int n, char *file_name){
+    bool sorted = true;
 
+    FILE *fp = fopen(file_name, "w");
+	if (fp == NULL) {
+        printf("Error opening file.\n");
+        return -2;
+    }
+
+    for (int i = 1; i < n; i++)
+		fprintf(fp, "%d\t", data[i]);
+        if (elements[i - 1] > elements[i])
+			printf("Error: The list is not sorted.\n");
+            sorted =  false;
+
+    fclose(fp);
+
+	return 0
 }
 
 int distribute_from_root(int *all_elements, int n, int **my_elements){
 	MPI_Scatter(input, elements_per_process, MPI_INT, process_memory, elements_per_process, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
-void gather_on_root(&output, &process_memory, elements_per_process){
-    MPI_Gather(process_memory, elements_per_process, MPI_INT, output, elements_per_process, MPI_INT, 0, MPI_COMM_WORLD);
+void gather_on_root(int *all_elements, int *my_elements, int local_n){
+
 }
 
 int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
@@ -140,14 +156,16 @@ void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
 
 }
 
+int read_input(char *file_name, int **elements){
+
+}
+
 int sorted_ascending(int *elements, int n){
 
 }
 
 void swap(int *e1, int *e2){
-    int temp = *e1;
-    *e1 = *e2;
-    *e2 = temp;
+
 }
 
 int compare(const void *v1, const void *v2){
@@ -179,5 +197,5 @@ int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
 }
 
 int select_pivot_smallest_root(int *elements, int n, MPI_Comm communicator){
-
+	
 }
