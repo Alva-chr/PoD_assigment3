@@ -40,13 +40,13 @@ int get_median(int *elements, int n);
  * Select a pivot element for parallel quick sort. Return the index of the first
  * element that is larger than the pivot. Note that this function assumes that
  * elements is sorted!
- * @param pivot_strategy 0=>smallest on root (Not recommended!) 1=>median on root 2=>mean of medians 3=>median of medians
- * @param elements Elements stored by the current process (sorted!)
- * @param n Length of elements
+ * @param pivot_strategy  0=>median on root 1=>mean of medians 2=>median of medians
+ * @param process_memory Elements stored by the current process (sorted!)
+ * @param elements_per_process Length of elements
  * @param communicator Communicator for processes in current group
  * @return The index of the first element after pivot
  */
-int select_pivot(int pivot_strategy, int *elements, int n, MPI_Comm communicator);
+int select_pivot(int pivot_strategy, int *process_memory, int elements_per_process, MPI_Comm communicator);
 
 /**
  * See select pivot!

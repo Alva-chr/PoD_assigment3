@@ -208,8 +208,55 @@ int get_median(int *elements, int n){
     return median;
 }
 
-int select_pivot(int pivot_strategy, int *elements, int n, MPI_Comm communicator){
+int select_pivot(int pivot_strategy, int *process_memory, int elements_per_process, MPI_Comm communicator){
 
+    int target_number, idx = -1;
+    // Switch statement
+    switch (pivot_strategy) {
+    case 0:
+        target_number = select_pivot_median_root(process_memory, elements_per_process, communicator);
+        break;
+    case 1:
+        target_number = select_pivot_mean_median(process_memory, elements_per_process, communicator);
+        break;
+    case 2:
+        target_number = select_pivot_medain_median(process_memory, elements_per_process, communicator);
+        break;
+    }
+
+    //finding the index the lazy way
+    for(int i = 0; i <elements_per_process;i++){
+        if(process_memory[i] == target_number){
+            idx = i;
+            break;
+        }
+    }
+
+    //binary research implmented as in geeks for geeks, see refrence in report
+    //https://www.geeksforgeeks.org/c/c-program-for-binary-search-recursive-and-iterative/
+    int left=0,right=elements_per_process, mid;
+
+    while (left <= right){
+        // calculating mid point
+        int mid = left + (right - left) / 2;
+
+        // Check if key is present at mid
+        if (arr[mid] == key){
+            idx = mid;
+        }
+
+        // If key greater than arr[mid], ignore left half
+        if (arr[mid] < key){
+            left = mid + 1;
+        }
+
+        // If key is smaller than or equal to arr[mid],
+        // ignore right half
+        else{
+            right = mid - 1;
+        }
+    }
+    return idx;
 }
 
 int select_pivot_median_root(int *elements, int n, MPI_Comm communicator){
