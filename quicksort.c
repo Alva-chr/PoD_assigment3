@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 		return 2;
 	}
 
-	MPI_Scatter(input, elements_per_process, MPI_INT, process_memory, elements_per_process, MPI_INT, root, MPI_COMM_WORLD);
+	distribute_from_root(input, elements_per_process, process_memory);
 
 	MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
@@ -119,7 +119,7 @@ int check_and_print(int *elements, int n, char *file_name){
 }
 
 int distribute_from_root(int *all_elements, int n, int **my_elements){
-
+	MPI_Scatter(input, elements_per_process, MPI_INT, process_memory, elements_per_process, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
 void gather_on_root(int *all_elements, int *my_elements, int local_n){
