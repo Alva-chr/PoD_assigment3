@@ -140,16 +140,14 @@ void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
 
 }
 
-int read_input(char *file_name, int **elements){
-
-}
-
 int sorted_ascending(int *elements, int n){
 
 }
 
 void swap(int *e1, int *e2){
-
+    int temp = *e1;
+    *e1 = *e2;
+    *e2 = temp;
 }
 
 int compare(const void *v1, const void *v2){
