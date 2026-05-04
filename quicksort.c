@@ -156,10 +156,37 @@ void gather_on_root(&output, &process_memory, elements_per_process){
 }
 
 int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
-    
+    int rank, size;
+	MPI_Comm_size(MPI_Comm, &size);
+	MPI_Comm_rank(MPI_Comm, &rank);
 
 
+    int pivot = select_pivot(pivot_strategy,*elements,n,MPI_Comm);
+
+    int *v1 = malloc((pivot)*sizeof(int));
+    int *v2 = malloc((n-pivot)*sizeof(int));
+
+    for (int i = 0; i<pivot;i++) {
+        v1[i] = elements[i];
+    }
+    for (int i = pivot;i<n;i++) {
+        v2[i-pivot] = elements[i];
+    }
+
     
+
+    if (rank<size/2){
+        //send v2
+    } else {
+        //send v1
+    }
+
+
+
+
+    global_sort()
+    free(v1);
+    free(v2);
 }
 
 void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
