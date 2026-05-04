@@ -55,6 +55,10 @@ int main(int argc, char **argv) {
 
 	distribute_from_root(input, elements_per_process, process_memory);
 
+    // Local sorting
+	qsort(process_memory, elements_per_array, size_of(int), comp);
+
+    global_sort()
 
 
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -152,7 +156,10 @@ void gather_on_root(&output, &process_memory, elements_per_process){
 }
 
 int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
+    
 
+
+    
 }
 
 void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
@@ -161,7 +168,7 @@ void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
     int i1 = 0;
     int i2 = 0;
     for (i; i < n; i++){
-        if (v1[i1] > v2[i2]){
+        if (v1[i1] < v2[i2]){
             result[i] = v1[i1];
             i1++;
         }
@@ -181,7 +188,7 @@ int sorted_ascending(int *elements, int n){
     int i;
     int res = 1;
     for (i=0; i<n; i++){
-        if (elements[i+1] < elements[i]){
+        if (elements[i+1] > elements[i]){
             ;
         }
         else{
