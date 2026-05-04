@@ -113,3 +113,67 @@ int write_output(char *file_name, const double *output, int num_values) {
 	}
 	return 0;
 }
+
+int check_and_print(int *elements, int n, char *file_name){
+
+}
+
+int distribute_from_root(int *all_elements, int n, int **my_elements){
+
+}
+
+void gather_on_root(int *all_elements, int *my_elements, int local_n){
+
+}
+
+int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
+
+}
+
+void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
+
+}
+
+int read_input(char *file_name, int **elements){
+
+}
+
+int sorted_ascending(int *elements, int n){
+
+}
+
+void swap(int *e1, int *e2){
+
+}
+
+int compare(const void *v1, const void *v2){
+
+}
+
+int get_larger_index(int *elements, int n, int val){
+
+}
+
+int get_median(int *elements, int n){
+
+}
+
+int select_pivot(int pivot_strategy, int *elements, int n, MPI_Comm communicator){
+
+}
+
+int select_pivot_median_root(int *elements, int n, MPI_Comm communicator){
+
+}
+
+int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
+
+}
+
+int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
+
+}
+
+int select_pivot_smallest_root(int *elements, int n, MPI_Comm communicator){
+	
+}
