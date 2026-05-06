@@ -59,13 +59,13 @@ int main(int argc, char **argv) {
 	qsort(process_memory, elements_per_process, sizeof(int), compare);
 
     // Global Sort Algorithm
-    global_sort(&process_memory,elements_per_process,sizeof(int),pivot_strategy);
+    global_sort(&process_memory,elements_per_process,MPI_COMM_WORLD,pivot_strategy);
 
     // Assembling sorted lists
-    MPI_Gather(output,num_values,sizeof(int),process_memory,elements_per_process,sizeof(int),root,MPI_COMM_WORLD);
+    MPI_Gather(output,num_values,MPI_INT,process_memory,elements_per_process,MPI_INT,root,MPI_COMM_WORLD);
 
     // Outputting results and checking success
-    check_and_print(output,num_values);
+    check_and_print(output,num_values, output_name);
 
 	MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
