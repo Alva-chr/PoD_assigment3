@@ -156,9 +156,13 @@ void gather_on_root(&output, &process_memory, elements_per_process){
 }
 
 int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
+
+    //Add MPI standard commands to use send and recv
     int rank, size;
 	MPI_Comm_size(MPI_Comm, &size);
 	MPI_Comm_rank(MPI_Comm, &rank);
+    MPI_Request req;
+    MPI_Status status;
 
     int pivot = select_pivot(pivot_strategy,*elements,n,MPI_Comm);
 
@@ -175,16 +179,41 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
     for (int i = pivot;i<n;i++) {
         v2[i-pivot] = elements[i];
     }
+    int len2 = n-pivot;
 
     int *vGot;
+    int lengot;
 
     if (rank<size/2){
         //send v2
         //recieve v1
-        MPI_Send()
-        vGot = malloc
+
+        //exchanging lengths of arrays
+        MPI_Irecv(&lengot, 1, MPI_INT, size/2+rank, 10, MPI_Comm, &req);
+        MPI_Send(&len2, 1, MPI_INT, size/2+rank, 10, MPI_Comm);
+        MPI_Wait(&req, &status);
+
+        vGot = malloc(lengot*sizeof(int));
+
+        //exchange arrays
+        MPI_Irecv(&vGot, lengot, MPI_INT, size/2+rank, 20, MPI_Comm, &req);
+        MPI_Send(&v2, len2, MPI_INT, size/2+rank, 20, MPI_Comm);
+        MPI_Wait(&req, &status);
     } else {
         //send v1
+        //recieve v2
+
+        //exchanging lengths of arrays
+        MPI_Irecv(&lengot, 1, MPI_INT, rank-size/2, 10, MPI_Comm, &req);
+        MPI_Send(&pivot, 1, MPI_INT, rank-size/2, 10, MPI_Comm); //pivot since length of v1 = pivot
+        MPI_Wait(&req, &status);
+
+        vGot = malloc(lengot*sizeof(int));
+
+        //exchange arrays
+        MPI_Irecv(&vGot, lengot, MPI_INT, rank-size/2, 20, MPI_Comm, &req);
+        MPI_Send(&v1, pivot, MPI_INT, rank-size/2, 20, MPI_Comm);
+        MPI_Wait(&req, &status);
     }
 
 
