@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 
 int main(int argc, char **argv) {
@@ -85,7 +86,7 @@ int main(int argc, char **argv) {
 }
 
 //Taken from assignment 2
-int read_input(const char *file_name, double **values) {
+int read_input(char *file_name, int **elements) {
 	FILE *file;
 	if (NULL == (file = fopen(file_name, "r"))) {
 		perror("Couldn't open input file");
@@ -96,12 +97,12 @@ int read_input(const char *file_name, double **values) {
 		perror("Couldn't read element count from input file");
 		return -1;
 	}
-	if (NULL == (*values = malloc(num_values * sizeof(double)))) {
+	if (NULL == (*elements = malloc(num_values * sizeof(double)))) {
 		perror("Couldn't allocate memory for input");
 		return -1;
 	}
 	for (int i=0; i<num_values; i++) {
-		if (EOF == fscanf(file, "%lf", &((*values)[i]))) {
+		if (EOF == fscanf(file, "%lf", &((*elements)[i]))) {
 			perror("Couldn't read elements from input file");
 			return -1;
 		}
@@ -114,6 +115,7 @@ int read_input(const char *file_name, double **values) {
 
 int check_and_print(int *elements, int n, char *file_name){
     bool sorted = true;
+    int i;
 
     FILE *fp = fopen(file_name, "w");
 	if (fp == NULL) {
@@ -121,30 +123,34 @@ int check_and_print(int *elements, int n, char *file_name){
         return -2;
     }
 
-    for (int i = 1; i < n; i++)
-		fprintf(fp, "%d\t", data[i]);
+    for (i = 1; i < n; i++)
+		fprintf(fp, "%d\t", elements[i]);
         if (elements[i - 1] > elements[i])
 			printf("Error: The list is not sorted.\n");
             sorted =  false;
 
     fclose(fp);
 
-	return 0
+	return 0;
 }
 
-int distribute_from_root(int *all_elements, int n, int **my_elements){
-	MPI_Scatter(input, elements_per_process, MPI_INT, process_memory, elements_per_process, MPI_INT, 0, MPI_COMM_WORLD);
+int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm communicator){
+    //Add MPI standard commands to use send and recv
+    int rank, size;
+	MPI_Comm_size(communicator, &size);
+	MPI_Comm_rank(communicator, &rank);
+	MPI_Scatter(&all_elements, n/size, MPI_INT, my_elements, n/size, MPI_INT, 0, communicator);
 }
 
 void gather_on_root(&output, &process_memory, elements_per_process){
     MPI_Gather(process_memory, elements_per_process, MPI_INT, output, elements_per_process, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
-int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
+int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy){
     //Add MPI standard commands to use send and recv
     int rank, size;
-	MPI_Comm_size(MPI_Comm, &size);
-	MPI_Comm_rank(MPI_Comm, &rank);
+	MPI_Comm_size(communicator, &size);
+	MPI_Comm_rank(communicator, &rank);
     MPI_Request req;
     MPI_Status status;
 
@@ -152,7 +158,7 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
         return n;
     }
 
-    int pivot = select_pivot(pivot_strategy,*elements,n,MPI_Comm);
+    int pivot = select_pivot(pivot_strategy,*elements,n,communicator);
 
     int *v1 = malloc((pivot)*sizeof(int));
     int *v2 = malloc((n-pivot)*sizeof(int));
@@ -175,15 +181,15 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
         //recieve v1
 
         //exchanging lengths of arrays
-        MPI_Irecv(&lengot, 1, MPI_INT, size/2+rank, 10, MPI_Comm, &req);
-        MPI_Send(&len2, 1, MPI_INT, size/2+rank, 10, MPI_Comm);
+        MPI_Irecv(&lengot, 1, MPI_INT, size/2+rank, 10, communicator, &req);
+        MPI_Send(&len2, 1, MPI_INT, size/2+rank, 10, communicator);
         MPI_Wait(&req, &status);
 
         vGot = malloc(lengot*sizeof(int));
 
         //exchange arrays
-        MPI_Irecv(&vGot, lengot, MPI_INT, size/2+rank, 20, MPI_Comm, &req);
-        MPI_Send(&v2, len2, MPI_INT, size/2+rank, 20, MPI_Comm);
+        MPI_Irecv(&vGot, lengot, MPI_INT, size/2+rank, 20, communicator, &req);
+        MPI_Send(&v2, len2, MPI_INT, size/2+rank, 20, communicator);
         MPI_Wait(&req, &status);
 
         resultLength = pivot+lengot;
@@ -197,15 +203,15 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
         //recieve v2
 
         //exchanging lengths of arrays
-        MPI_Irecv(&lengot, 1, MPI_INT, rank-size/2, 10, MPI_Comm, &req);
-        MPI_Send(&pivot, 1, MPI_INT, rank-size/2, 10, MPI_Comm); //pivot since length of v1 = pivot
+        MPI_Irecv(&lengot, 1, MPI_INT, rank-size/2, 10, communicator, &req);
+        MPI_Send(&pivot, 1, MPI_INT, rank-size/2, 10, communicator); //pivot since length of v1 = pivot
         MPI_Wait(&req, &status);
 
         vGot = malloc(lengot*sizeof(int));
 
         //exchange arrays
-        MPI_Irecv(&vGot, lengot, MPI_INT, rank-size/2, 20, MPI_Comm, &req);
-        MPI_Send(&v1, pivot, MPI_INT, rank-size/2, 20, MPI_Comm);
+        MPI_Irecv(&vGot, lengot, MPI_INT, rank-size/2, 20, communicator, &req);
+        MPI_Send(&v1, pivot, MPI_INT, rank-size/2, 20, communicator);
         MPI_Wait(&req, &status);
 
         resultLength = len2+lengot;
@@ -219,7 +225,7 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
     int color = rank / (size / 2); // Determine color based on row
 
     MPI_Comm newcomm;
-    MPI_Comm_Split(MPI_Comm, color, rank, &newcomm);
+    MPI_Comm_Split(communicator, color, rank, &newcomm);
 
     int newLength = global_sort(**result,resultLength,newcomm,pivot_strategy);
     
@@ -359,15 +365,15 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
 
 int select_pivot_median_root(int *elements, int n, MPI_Comm communicator){
     int median = get_median(elements,n);
-    MPI_Bcast(&median, 1, MPI_INT, 0, MPI_Comm);
+    MPI_Bcast(&median, 1, MPI_INT, 0, communicator);
     return median;
 }
 
 int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
     //Add MPI standard commands to use send and recv
     int rank, size;
-	MPI_Comm_size(MPI_Comm, &size);
-	MPI_Comm_rank(MPI_Comm, &rank);
+	MPI_Comm_size(communicator, &size);
+	MPI_Comm_rank(communicator, &rank);
 
     //get median for my process
     int med = get_median(*elements, n);
@@ -377,7 +383,7 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
     int mean_median;
 
     //Use MPI_Reduce to sum all medians
-    MPI_Reduce(&med, &sum, 1, MPI_INT, MPI_SUM, 0, MPI_Comm);
+    MPI_Reduce(&med, &sum, 1, MPI_INT, MPI_SUM, 0, communicator);
 
     if(rank==0){
         mean_median = sum/size;
@@ -387,8 +393,8 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
 }
 
 int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
-	MPI_Comm_size(MPI_Comm, &size);
-	MPI_Comm_rank(MPI_Comm, &rank);
+	MPI_Comm_size(communicator, &size);
+	MPI_Comm_rank(communicator, &rank);
 
     int collected_medians = malloc(size*sizeof(int));
 

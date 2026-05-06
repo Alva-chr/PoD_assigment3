@@ -23,7 +23,7 @@ int check_and_print(int *elements, int n, char *file_name);
  * @param my_elements Pointer to buffer where the local elements will be stored
  * @return Number of elements received by the current process
  */
-int distribute_from_root(int *all_elements, int n, int **my_elements);
+int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm communicator);
 
 /**
  * Gather elements from all processes on root. Put root's elements first and
@@ -46,7 +46,7 @@ void gather_on_root(int *all_elements, int *my_elements, int local_n);
  * @param pivot_strategy Tells how to select the pivot element. See documentation of select_pivot in pivot.h.
  * @return New length of *elements
  */
-int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy);
+int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy);
 
 /**
  * Merge v1 and v2 to one array, sorted in ascending order, and store the result
