@@ -221,12 +221,16 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
     MPI_Comm newcomm;
     MPI_Comm_Split(MPI_Comm, color, rank, &newcomm);
 
-    return global_sort(**result,resultLength,newcomm,pivot_strategy);
+    int newLength = global_sort(**result,resultLength,newcomm,pivot_strategy);
+    
+    swap(elements, result);
     
     free(v1);
     free(v2);
     free(result);
     free(vGot);
+
+    return newLength
 }
 
 void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
