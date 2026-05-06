@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 		return 2;
 	}
 
-	distribute_from_root(input, elements_per_process, &process_memory);
+	distribute_from_root(input, elements_per_process, &process_memory, MPI_COMM_WORLD);
 
     // Local sorting
 	qsort(process_memory, elements_per_process, sizeof(int), compare);
@@ -102,7 +102,7 @@ int read_input(char *file_name, int **elements) {
 		return -1;
 	}
 	for (int i=0; i<num_values; i++) {
-		if (EOF == fscanf(file, "%lf", &((*elements)[i]))) {
+		if (EOF == fscanf(file, "%d", &((*elements)[i]))) {
 			perror("Couldn't read elements from input file");
 			return -1;
 		}
@@ -114,7 +114,6 @@ int read_input(char *file_name, int **elements) {
 }
 
 int check_and_print(int *elements, int n, char *file_name){
-    bool sorted = true;
     int i;
 
     FILE *fp = fopen(file_name, "w");
@@ -125,9 +124,9 @@ int check_and_print(int *elements, int n, char *file_name){
 
     for (i = 1; i < n; i++)
 		fprintf(fp, "%d\t", elements[i]);
-        if (elements[i - 1] > elements[i])
+        if (elements[i - 1] > elements[i]){
 			printf("Error: The list is not sorted.\n");
-            sorted =  false;
+        }
 
     fclose(fp);
 
@@ -142,8 +141,8 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
 	MPI_Scatter(&all_elements, n/size, MPI_INT, my_elements, n/size, MPI_INT, 0, communicator);
 }
 
-void gather_on_root(&output, &process_memory, elements_per_process){
-    MPI_Gather(process_memory, elements_per_process, MPI_INT, output, elements_per_process, MPI_INT, 0, MPI_COMM_WORLD);
+void gather_on_root(int *all_elements, int *my_elements, int local_n, MPI_Comm communicator){
+    MPI_Gather(my_elements, local_n, MPI_INT, all_elements, local_n, MPI_INT, 0, communicator);
 }
 
 int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy){
@@ -164,10 +163,10 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     int *v2 = malloc((n-pivot)*sizeof(int));
 
     for (int i = 0; i<pivot;i++) {
-        v1[i] = elements[i];
+        v1[i] = (int*)elements[i];
     }
     for (int i = pivot;i<n;i++) {
-        v2[i-pivot] = elements[i];
+        v2[i-pivot] = (int*)elements[i];
     }
     int len2 = n-pivot;
 
