@@ -160,11 +160,14 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
 	MPI_Comm_size(MPI_Comm, &size);
 	MPI_Comm_rank(MPI_Comm, &rank);
 
-
     int pivot = select_pivot(pivot_strategy,*elements,n,MPI_Comm);
 
     int *v1 = malloc((pivot)*sizeof(int));
     int *v2 = malloc((n-pivot)*sizeof(int));
+
+
+
+    
 
     for (int i = 0; i<pivot;i++) {
         v1[i] = elements[i];
@@ -173,10 +176,13 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
         v2[i-pivot] = elements[i];
     }
 
-    
+    int *vGot;
 
     if (rank<size/2){
         //send v2
+        //recieve v1
+        MPI_Send()
+        vGot = malloc
     } else {
         //send v1
     }
