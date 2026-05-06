@@ -228,7 +228,7 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
 
     int newLength = global_sort(&result,resultLength,newcomm,pivot_strategy);
     
-    swap(&elements, result);
+    swap(elements, result);
     
     free(v1);
     free(v2);
