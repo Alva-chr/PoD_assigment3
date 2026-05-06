@@ -182,6 +182,7 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
     int len2 = n-pivot;
 
     int *vGot;
+    int *result;
     int lengot;
 
     if (rank<size/2){
@@ -199,6 +200,11 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
         MPI_Irecv(&vGot, lengot, MPI_INT, size/2+rank, 20, MPI_Comm, &req);
         MPI_Send(&v2, len2, MPI_INT, size/2+rank, 20, MPI_Comm);
         MPI_Wait(&req, &status);
+
+        //merge arrays using merge_ascending
+        result = malloc((pivot+lengot)*sizeof(int));
+
+        merge_ascending(*v1, pivot, *vGot, lengot, *result);
     } else {
         //send v1
         //recieve v2
@@ -214,6 +220,11 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
         MPI_Irecv(&vGot, lengot, MPI_INT, rank-size/2, 20, MPI_Comm, &req);
         MPI_Send(&v1, pivot, MPI_INT, rank-size/2, 20, MPI_Comm);
         MPI_Wait(&req, &status);
+
+        //merge arrays using merge_ascending
+        result = malloc((lengot+len2)*sizeof(int));
+
+        merge_ascending(*vGot, lengot, *v2, len2, *result);
     }
 
 
@@ -243,7 +254,6 @@ void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
             i2++;
         }
     }
-    return *result;
 }
 
 int sorted_ascending(int *elements, int n){
