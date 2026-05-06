@@ -33,7 +33,7 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
  * @param my_elements Elements to be gathered from the current process
  * @param local_n Number of elements in my_elements
  */
-void gather_on_root(int *all_elements, int *my_elements, int local_n);
+void gather_on_root(int *all_elements, int *my_elements, int local_n, MPI_Comm communicator);
 
 /**
  * Perform the global part of parallel quick sort. This function assumes that
