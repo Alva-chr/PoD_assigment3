@@ -372,7 +372,7 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
 
 int select_pivot_median_root(int *elements, int n, MPI_Comm communicator){
     int median = get_median(elements,n);
-    MPI_Bcast(&median, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&median, 1, MPI_INT, 0, MPI_Comm);
     return median;
 }
 
