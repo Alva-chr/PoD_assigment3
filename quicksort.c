@@ -400,5 +400,15 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
 }
 
 int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
+	MPI_Comm_size(MPI_Comm, &size);
+	MPI_Comm_rank(MPI_Comm, &rank);
 
+    int collected_medians = malloc(size*sizeof(int));
+
+    int process_median = get_median(elements, n);
+
+    MPI_Gather(process_median, 1, MPI_INT, collected_medians, 1, MPI_DOUBLE,0, communicator);
+    qsort(collected_medians, size, size_of(int), compare);
+
+    return get_median(collected_medians, size);
 }
