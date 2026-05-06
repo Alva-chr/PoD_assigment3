@@ -56,12 +56,16 @@ int main(int argc, char **argv) {
 	distribute_from_root(input, elements_per_process, process_memory);
 
     // Local sorting
-	qsort(process_memory, elements_per_array, size_of(int), comp);
+	qsort(process_memory, elements_per_array, sizeof(int), comp);
 
-    global_sort()
+    // Global Sort Algorithm
+    global_sort(process_memory,elements_per_array,sizeof(int),pivot_strategy);
 
+    // Assembling sorted lists
+    MPI_Gather(output,num_values,sizeof(int),process_memory,elements_per_array,sizeof(int),root,MPI_COMM_WORLD);
 
-
+    // Outputting results and checking success
+    check_and_print(output,num_values);
 
 	MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
