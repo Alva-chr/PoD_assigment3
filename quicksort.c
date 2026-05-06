@@ -319,13 +319,13 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
     int target_number, idx = -1;
     // Switch statement to find the right pivot strategy
     switch (pivot_strategy) {
-    case 0:
+    case 1:
         target_number = select_pivot_median_root(process_memory, elements_per_process, communicator);
         break;
-    case 1:
+    case 2:
         target_number = select_pivot_mean_median(process_memory, elements_per_process, communicator);
         break;
-    case 2:
+    case 3:
         target_number = select_pivot_medain_median(process_memory, elements_per_process, communicator);
         break;
     }
