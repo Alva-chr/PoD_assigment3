@@ -4,8 +4,8 @@ BINS = quicksort
 
 all: $(BINS)
 
-quicksort: quicksort.h quicksort.c pivot.h pivot.c
-	$(CC) $(CFLAGS) -o $@ quicksort.c pivot.c
+quicksort: quicksort.h quicksort.c pivot.h
+	$(CC) $(CFLAGS) -o $@ quicksort.c
 
 clean:
 	$(RM) $(BINS)
