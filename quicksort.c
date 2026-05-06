@@ -377,7 +377,26 @@ int select_pivot_median_root(int *elements, int n, MPI_Comm communicator){
 }
 
 int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
+    //Add MPI standard commands to use send and recv
+    int rank, size;
+	MPI_Comm_size(MPI_Comm, &size);
+	MPI_Comm_rank(MPI_Comm, &rank);
 
+    //get median for my process
+    int med = get_median(*elements, n);
+
+    //initialize sum and mean_median
+    int sum;
+    int mean_median;
+
+    //Use MPI_Reduce to sum all medians
+    MPI_Reduce(&med, &sum, 1, MPI_INT, MPI_SUM, 0, MPI_Comm);
+
+    if(rank==0){
+        mean_median = sum/size;
+    }
+
+    return mean_median;
 }
 
 int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
