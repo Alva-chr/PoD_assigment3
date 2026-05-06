@@ -112,27 +112,6 @@ int read_input(const char *file_name, double **values) {
 	return num_values;
 }
 
-
-int write_output(char *file_name, const double *output, int num_values) {
-	FILE *file;
-	if (NULL == (file = fopen(file_name, "w"))) {
-		perror("Couldn't open output file");
-		return -1;
-	}
-	for (int i = 0; i < num_values; i++) {
-		if (0 > fprintf(file, "%.4f ", output[i])) {
-			perror("Couldn't write to output file");
-		}
-	}
-	if (0 > fprintf(file, "\n")) {
-		perror("Couldn't write to output file");
-	}
-	if (0 != fclose(file)) {
-		perror("Warning: couldn't close output file");
-	}
-	return 0;
-}
-
 int check_and_print(int *elements, int n, char *file_name){
     bool sorted = true;
 
