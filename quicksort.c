@@ -228,7 +228,7 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
 
     int newLength = global_sort(&result,resultLength,newcomm,pivot_strategy);
     
-    swap(elements, result);
+    swap(&elements, result);
     
     free(v1);
     free(v2);
@@ -404,5 +404,5 @@ int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
     MPI_Gather(&process_median, 1, MPI_INT, &collected_medians, 1, MPI_DOUBLE,0, communicator);
     qsort(&collected_medians, size, sizeof(int), compare);
 
-    return get_median(&collected_medians, size);
+    return get_median(*collected_medians, size);
 }
