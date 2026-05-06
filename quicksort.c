@@ -163,10 +163,10 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     int *v2 = malloc((n-pivot)*sizeof(int));
 
     for (int i = 0; i<pivot;i++) {
-        v1[i] = (int*)elements[i];
+        v1[i] = *(int*)elements[i];
     }
     for (int i = pivot;i<n;i++) {
-        v2[i-pivot] = (int*)elements[i];
+        v2[i-pivot] = *(int*)elements[i];
     }
     int len2 = n-pivot;
 
@@ -196,7 +196,7 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         //merge arrays using merge_ascending
         result = malloc(resultLength*sizeof(int));
 
-        merge_ascending(*v1, pivot, *vGot, lengot, *result);
+        merge_ascending(v1, pivot, vGot, lengot, result);
     } else {
         //send v1
         //recieve v2
@@ -218,24 +218,24 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         //merge arrays using merge_ascending
         result = malloc(resultLength*sizeof(int));
 
-        merge_ascending(*vGot, lengot, *v2, len2, *result);
+        merge_ascending(vGot, lengot, v2, len2, result);
     }
 
     int color = rank / (size / 2); // Determine color based on row
 
     MPI_Comm newcomm;
-    MPI_Comm_Split(communicator, color, rank, &newcomm);
+    MPI_Comm_split(communicator, color, rank, &newcomm);
 
-    int newLength = global_sort(**result,resultLength,newcomm,pivot_strategy);
+    int newLength = global_sort(&result,resultLength,newcomm,pivot_strategy);
     
-    swap(elements, result);
+    swap(*elements, *result);
     
     free(v1);
     free(v2);
     free(result);
     free(vGot);
 
-    return newLength
+    return newLength;
 }
 
 void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
@@ -243,7 +243,7 @@ void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
     int i;
     int i1 = 0;
     int i2 = 0;
-    for (i; i < n; i++){
+    for(i; i < n; i++){
         if (v1[i1] < v2[i2]){
             result[i] = v1[i1];
             i1++;
@@ -282,10 +282,10 @@ void swap(int *e1, int *e2){
 
 int compare(const void *v1, const void *v2){
     int res;
-    if (*v1 == *v2){
+    if (v1 == v2){
         res = 0;
     }
-    else if (*v1 > *v2){
+    else if (v1 > v2){
         res = 1;
     }
     else{
@@ -299,7 +299,7 @@ int get_larger_index(int *elements, int n, int val){
     int i;
     for (i = 0; i < n; i++){
         if (elements[i] > val){
-            break
+            break;
         }
         index++;
     }
@@ -331,25 +331,25 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
         target_number = select_pivot_mean_median(process_memory, elements_per_process, communicator);
         break;
     case 3:
-        target_number = select_pivot_medain_median(process_memory, elements_per_process, communicator);
+        target_number = select_pivot_median_median(process_memory, elements_per_process, communicator);
         break;
     }
 
     //binary research implmented as in geeks for geeks, see refrence in report and the link below
     //https://www.geeksforgeeks.org/c/c-program-for-binary-search-recursive-and-iterative/
-    int left=0,right=elements_per_process, mid;
+    int left=0,right=elements_per_process;
 
     while (left <= right){
         // calculating mid point
         int mid = left + (right - left) / 2;
 
         // Check if key is present at mid
-        if (arr[mid] == key){
+        if (process_memory[mid] == target_number){
             idx = mid;
         }
 
         // If key greater than arr[mid], ignore left half
-        if (arr[mid] < key){
+        if (process_memory[mid] < target_number){
             left = mid + 1;
         }
 
@@ -375,7 +375,7 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
 	MPI_Comm_rank(communicator, &rank);
 
     //get median for my process
-    int med = get_median(*elements, n);
+    int med = get_median(elements, n);
 
     //initialize sum and mean_median
     int sum;
@@ -392,6 +392,8 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
 }
 
 int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
+    //Add MPI standard commands to use send and recv
+    int rank, size;
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);
 
