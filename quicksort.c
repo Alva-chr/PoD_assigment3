@@ -61,6 +61,8 @@ int main(int argc, char **argv) {
     global_sort()
 
 
+
+
 	MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
 
@@ -156,7 +158,6 @@ void gather_on_root(&output, &process_memory, elements_per_process){
 }
 
 int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
-
     //Add MPI standard commands to use send and recv
     int rank, size;
 	MPI_Comm_size(MPI_Comm, &size);
@@ -164,14 +165,14 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
     MPI_Request req;
     MPI_Status status;
 
+    if (size==1){
+        return n;
+    }
+
     int pivot = select_pivot(pivot_strategy,*elements,n,MPI_Comm);
 
     int *v1 = malloc((pivot)*sizeof(int));
     int *v2 = malloc((n-pivot)*sizeof(int));
-
-
-
-    
 
     for (int i = 0; i<pivot;i++) {
         v1[i] = elements[i];
@@ -184,6 +185,7 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
     int *vGot;
     int *result;
     int lengot;
+    int resultLength;
 
     if (rank<size/2){
         //send v2
@@ -201,8 +203,10 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
         MPI_Send(&v2, len2, MPI_INT, size/2+rank, 20, MPI_Comm);
         MPI_Wait(&req, &status);
 
+        resultLength = pivot+lengot;
+
         //merge arrays using merge_ascending
-        result = malloc((pivot+lengot)*sizeof(int));
+        result = malloc(resultLength*sizeof(int));
 
         merge_ascending(*v1, pivot, *vGot, lengot, *result);
     } else {
@@ -221,18 +225,25 @@ int global_sort(int **elements, int n, MPI_Comm, int pivot_strategy){
         MPI_Send(&v1, pivot, MPI_INT, rank-size/2, 20, MPI_Comm);
         MPI_Wait(&req, &status);
 
+        resultLength = len2+lengot;
+
         //merge arrays using merge_ascending
-        result = malloc((lengot+len2)*sizeof(int));
+        result = malloc(resultLength*sizeof(int));
 
         merge_ascending(*vGot, lengot, *v2, len2, *result);
     }
 
+    int color = rank / (size / 2); // Determine color based on row
 
+    MPI_Comm newcomm;
+    MPI_Comm_Split(MPI_Comm, color, rank, &newcomm);
 
-
-    global_sort()
+    return global_sort(**result,resultLength,newcomm,pivot_strategy);
+    
     free(v1);
     free(v2);
+    free(result);
+    free(vGot);
 }
 
 void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
@@ -360,7 +371,7 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
 }
 
 int select_pivot_median_root(int *elements, int n, MPI_Comm communicator){
-
+    
 }
 
 int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
