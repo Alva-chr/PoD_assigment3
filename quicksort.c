@@ -319,7 +319,7 @@ int get_median(int *elements, int n){
 int select_pivot(int pivot_strategy, int *process_memory, int elements_per_process, MPI_Comm communicator){
 
     int target_number, idx = -1;
-    // Switch statement
+    // Switch statement to find the right pivot strategy
     switch (pivot_strategy) {
     case 0:
         target_number = select_pivot_median_root(process_memory, elements_per_process, communicator);
@@ -332,15 +332,7 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
         break;
     }
 
-    //finding the index the lazy way
-    for(int i = 0; i <elements_per_process;i++){
-        if(process_memory[i] == target_number){
-            idx = i;
-            break;
-        }
-    }
-
-    //binary research implmented as in geeks for geeks, see refrence in report
+    //binary research implmented as in geeks for geeks, see refrence in report and the link below
     //https://www.geeksforgeeks.org/c/c-program-for-binary-search-recursive-and-iterative/
     int left=0,right=elements_per_process, mid;
 
