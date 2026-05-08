@@ -181,6 +181,8 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
 
     int pivot = select_pivot(pivot_strategy,*elements,n,communicator);
 
+    if (rank==0) printf("\n%d\n",pivot);
+
     if (rank==0) printf("\n2\n");
 
     int *v1 = malloc((pivot)*sizeof(int));
