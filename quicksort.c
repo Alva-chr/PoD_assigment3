@@ -8,21 +8,19 @@
 
 int main(int argc, char **argv) {
 
-    printf("\n0\n");
+    
 
 	if (4 != argc) {
 		printf("Usage: quicksort input_file output_file pivot_strategy\n");
 		return 1;
 	}
 
-    printf("\n1\n");
 
     //collecting input data
 	char *input_name = argv[1];
 	char *output_name = argv[2];
 	int pivot_strategy = atoi(argv[3]); // 
 
-    printf("\n2\n");
 
 	const int root = 0;
 	int rank, size;
@@ -37,7 +35,7 @@ int main(int argc, char **argv) {
 	int *output = NULL;
 	int num_values;
 
-    if (rank==root) printf("\n3\n");
+    
 
 	//Only the the process with rank 0 will read in the full input file
 	if(rank == root){
@@ -51,7 +49,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-    if (rank==root) printf("\n4\n");
 
 
 
@@ -63,7 +60,6 @@ int main(int argc, char **argv) {
 
 	MPI_Bcast(&elements_per_process, 1, MPI_INT, root, MPI_COMM_WORLD);
 
-    if (rank==root) printf("\n5\n");
 
 	//Allocating memory for each process
 	if (NULL == (process_memory = malloc(elements_per_process* sizeof(int)))) {
@@ -71,29 +67,24 @@ int main(int argc, char **argv) {
 		return 2;
 	}
 
-    if (rank==root) printf("\n6\n");
 
 	distribute_from_root(input, elements_per_process, &process_memory, MPI_COMM_WORLD);
 
     // Local sorting
 	qsort(process_memory, elements_per_process, sizeof(int), compare);
 
-    if (rank==root) printf("\n7\n");
 
     // Global Sort Algorithm
     global_sort(&process_memory,elements_per_process,MPI_COMM_WORLD,pivot_strategy);
 
-    if (rank==root) printf("\n8\n");
 
     // Assembling sorted lists
     MPI_Gather(output,num_values,MPI_INT,process_memory,elements_per_process,MPI_INT,root,MPI_COMM_WORLD);
 
-    if (rank==root) printf("\n9\n");
 
     // Outputting results and checking success
     check_and_print(output,num_values, output_name);
 
-    if (rank==root) printf("\n10\n");
 
 	MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
@@ -165,7 +156,7 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
     int rank, size;
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);
-	MPI_Scatter(&all_elements, n/size, MPI_INT, my_elements, n/size, MPI_INT, 0, communicator);
+	return MPI_Scatter(&all_elements, n/size, MPI_INT, my_elements, n/size, MPI_INT, 0, communicator);
 }
 
 void gather_on_root(int *all_elements, int *my_elements, int local_n, MPI_Comm communicator){
@@ -180,11 +171,17 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     MPI_Request req;
     MPI_Status status;
 
+    if (rank==0) printf("\n0\n");
+
     if (size==1){
         return n;
     }
 
+    if (rank==0) printf("\n1\n");
+
     int pivot = select_pivot(pivot_strategy,*elements,n,communicator);
+
+    if (rank==0) printf("\n2\n");
 
     int *v1 = malloc((pivot)*sizeof(int));
     int *v2 = malloc((n-pivot)*sizeof(int));
@@ -201,6 +198,8 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     int *result;
     int lengot;
     int resultLength;
+
+    if (rank==0) printf("\n3\n");
 
     if (rank<size/2){
         //send v2
@@ -247,6 +246,8 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
 
         merge_ascending(vGot, lengot, v2, len2, result);
     }
+
+    if (rank==0) printf("\n4\n");
 
     int color = rank / (size / 2); // Determine color based on row
 
