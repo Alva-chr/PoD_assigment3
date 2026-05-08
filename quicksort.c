@@ -150,23 +150,35 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
     int elements_per_process;
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);7
-    int first = rank*num_steps/size;
+    int first;
 	int last;
     int i;
-	if (rank!=size-1) {
-		last = (rank+1)*num_steps/size-1;
-	} else {
-		last = num_steps-1;
-	}
-    
-    int length = last-first;
-
+    int *distribute_list = malloc(size*sizeof(int));
+    int *displacement_list = malloc(size*sizeof(int));
+    int sum = 0;
+    for (int loop_rank = 0;loop_rank<size;loop_rank++){
+        first = loop_rank*num_steps/size
+        if (loop_rank!=size-1) {
+            last = (rank+1)*num_steps/size;
+        } else {
+            last = num_steps;
+        }
+        distribute_list[loop_rank] = last-first;
+        displacement_list[loop_rank] = sum;
+        sum += last-first;
+    }
+	
     //allocate
-    my_elements = malloc(length*sizeof(int));
+    *my_elements = malloc(distribute_list[rank]*sizeof(int));
 
-    //Add distribution!!!
+    //Distribution
+    MPI_Scatterv(all_elements, distribute_list, distribute_list, MPI_INT, my_elements, displacement_list[rank], MPI_INT, 0, communicator);
+
+    // Clean up local metadata
+    free(distribute_list);
+    free(displacement_list);
     
-	return MPI_Scatter(&all_elements, n/size, MPI_INT, my_elements, n/size, MPI_INT, 0, communicator);
+	return length;
 }
 
 void gather_on_root(int *all_elements, int *my_elements, int local_n, MPI_Comm communicator){
