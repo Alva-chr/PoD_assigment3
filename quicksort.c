@@ -67,12 +67,15 @@ int main(int argc, char **argv) {
 
 
     // Global Sort Algorithm
-    global_sort(&process_memory,memory_length,MPI_COMM_WORLD,pivot_strategy);
+    memory_length = global_sort(&process_memory,memory_length,MPI_COMM_WORLD,pivot_strategy);
+
+    if (rank==0) printf("\nGlobal sort is over\n");
 
 
     // Assembling sorted lists
-    MPI_Gather(output,num_values,MPI_INT,process_memory,memory_length,MPI_INT,root,MPI_COMM_WORLD);
+    gather_on_root(output, process_memory, memory_length, MPI_COMM_WORLD);
 
+    if (rank==0) printf("\nGather is over\n");
 
     // Outputting results and checking success
     check_and_print(output,num_values, output_name);
@@ -91,6 +94,7 @@ int main(int argc, char **argv) {
 
 	MPI_Reduce(&my_execution_time, &max_execution_time, 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD);
 
+    free(process_memory);
 
     MPI_Finalize(); 
 }
@@ -151,7 +155,6 @@ int check_and_print(int *elements, int n, char *file_name){
 }
 
 int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm communicator){
-    //Add MPI standard commands to use send and recv
     int rank, size;
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);
@@ -161,7 +164,8 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
     int sum = 0;
 
     for (int loop_rank = 0;loop_rank<size;loop_rank++){
-        first = loop_rank*n/size;
+        int first = loop_rank*n/size;
+        int last;
         if (loop_rank!=size-1) {
             last = (loop_rank+1)*n/size;
         } else {
@@ -171,21 +175,28 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
         displacement_list[loop_rank] = sum;
         sum += last-first;
     }
+
+    int my_length = length_list[rank];
 	
     //allocate
-    *my_elements = malloc(length_list[rank]*sizeof(int));
+    *my_elements = malloc(my_length*sizeof(int));
 
     //Distribution
-    MPI_Scatterv(all_elements, length_list, displacement_list, MPI_INT, *my_elements, length_list[rank], MPI_INT, 0, communicator);
-    // Clean up local metadata
+    MPI_Scatterv(all_elements, length_list, displacement_list, MPI_INT, *my_elements, my_length, MPI_INT, 0, communicator);
+
     free(length_list);
     free(displacement_list);
     
-    return length_list[rank];
+    return my_length;
 }
 
 void gather_on_root(int *all_elements, int *my_elements, int local_n, MPI_Comm communicator){
-    MPI_Gather(my_elements, local_n, MPI_INT, all_elements, local_n, MPI_INT, 0, communicator);
+    int rank, size;
+	MPI_Comm_size(communicator, &size);
+	MPI_Comm_rank(communicator, &rank);
+    
+    int *length_list = malloc(size*sizeof(int));
+    int *displacement_list = malloc(size*sizeof(int));
 }
 
 int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy){
@@ -244,8 +255,8 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         vGot = malloc(lengot*sizeof(int));
 
         //exchange arrays
-        MPI_Irecv(&vGot, lengot, MPI_INT, size/2+rank, 20, communicator, &req);
-        MPI_Send(&v2, len2, MPI_INT, size/2+rank, 20, communicator);
+        MPI_Irecv(vGot, lengot, MPI_INT, size/2+rank, 20, communicator, &req);
+        MPI_Send(v2, len2, MPI_INT, size/2+rank, 20, communicator);
         MPI_Wait(&req, &status);
 
         if (rank==0) printf("\na3\n");
@@ -277,8 +288,8 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         vGot = malloc(lengot*sizeof(int));
 
         //exchange arrays
-        MPI_Irecv(&vGot, lengot, MPI_INT, rank-size/2, 20, communicator, &req);
-        MPI_Send(&v1, pivot, MPI_INT, rank-size/2, 20, communicator);
+        MPI_Irecv(vGot, lengot, MPI_INT, rank-size/2, 20, communicator, &req);
+        MPI_Send(v1, pivot, MPI_INT, rank-size/2, 20, communicator);
         MPI_Wait(&req, &status);
 
         if (rank==1) printf("\nb3\n");
