@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 	int *input = NULL; //So that each process 
 	int *output = NULL;
 	int num_values;
-
+    int elements_per_process = NULL;
     
 
 	//Only the the process with rank 0 will read in the full input file
@@ -43,23 +43,16 @@ int main(int argc, char **argv) {
 			perror("Couldn't read input");
 			return 2;
 		}
+        elements_per_process = num_values/size;
 		if (NULL == (output = malloc(num_values*sizeof(int)))) {
 			perror("Couldn't allocate memory for output");
 			return 2;
 		}
 	}
 
-
-
-
-    
-
-	int elements_per_process = num_values/size;
 	int *process_memory;
 
-
 	MPI_Bcast(&elements_per_process, 1, MPI_INT, root, MPI_COMM_WORLD);
-
 
 	//Allocating memory for each process
 	if (NULL == (process_memory = malloc(elements_per_process* sizeof(int)))) {
