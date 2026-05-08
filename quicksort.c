@@ -205,10 +205,14 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         //send v2
         //recieve v1
 
+        if (rank==0) printf("\na1\n");
+
         //exchanging lengths of arrays
         MPI_Irecv(&lengot, 1, MPI_INT, size/2+rank, 10, communicator, &req);
         MPI_Send(&len2, 1, MPI_INT, size/2+rank, 10, communicator);
         MPI_Wait(&req, &status);
+
+        if (rank==0) printf("\na2\n");
 
         vGot = malloc(lengot*sizeof(int));
 
@@ -217,20 +221,31 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         MPI_Send(&v2, len2, MPI_INT, size/2+rank, 20, communicator);
         MPI_Wait(&req, &status);
 
+        if (rank==0) printf("\na3\n");
+
         resultLength = pivot+lengot;
 
         //merge arrays using merge_ascending
         result = malloc(resultLength*sizeof(int));
 
+        if (rank==0) printf("\na4\n");
+
         merge_ascending(v1, pivot, vGot, lengot, result);
+
+        if (rank==0) printf("\na5\n");
     } else {
         //send v1
         //recieve v2
+
+        if (rank==1) printf("\nb1\n");
+
 
         //exchanging lengths of arrays
         MPI_Irecv(&lengot, 1, MPI_INT, rank-size/2, 10, communicator, &req);
         MPI_Send(&pivot, 1, MPI_INT, rank-size/2, 10, communicator); //pivot since length of v1 = pivot
         MPI_Wait(&req, &status);
+
+        if (rank==1) printf("\nb2\n");
 
         vGot = malloc(lengot*sizeof(int));
 
@@ -239,12 +254,20 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         MPI_Send(&v1, pivot, MPI_INT, rank-size/2, 20, communicator);
         MPI_Wait(&req, &status);
 
+        if (rank==1) printf("\nb3\n");
+
         resultLength = len2+lengot;
+
+        
 
         //merge arrays using merge_ascending
         result = malloc(resultLength*sizeof(int));
 
+        if (rank==1) printf("\nb4\n");
+
         merge_ascending(vGot, lengot, v2, len2, result);
+
+        if (rank==1) printf("\nb5\n");
     }
 
     if (rank==0) printf("\n4\n");
