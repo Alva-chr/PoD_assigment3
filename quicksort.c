@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
 			perror("Couldn't read input");
 			return 2;
 		}
-        elements_per_process = num_values/size;
+        //elements_per_process = num_values/size;
 		if (NULL == (output = malloc(num_values*sizeof(int)))) {
 			perror("Couldn't allocate memory for output");
 			return 2;
@@ -52,16 +52,16 @@ int main(int argc, char **argv) {
 
 	int *process_memory;
 
-	MPI_Bcast(&elements_per_process, 1, MPI_INT, root, MPI_COMM_WORLD);
+	MPI_Bcast(&num_values, 1, MPI_INT, root, MPI_COMM_WORLD);
 
 	//Allocating memory for each process
-	if (NULL == (process_memory = malloc(elements_per_process* sizeof(int)))) {
+	/*if (NULL == (process_memory = malloc(elements_per_process* sizeof(int)))) {
 		perror("Couldn't allocate memory for process memory");
 		return 2;
-	}
+	}*/
 
 
-	distribute_from_root(input, elements_per_process, &process_memory, MPI_COMM_WORLD);
+	distribute_from_root(input, num_values, &process_memory, MPI_COMM_WORLD);
 
     // Local sorting
 	qsort(process_memory, elements_per_process, sizeof(int), compare);
@@ -147,8 +147,25 @@ int check_and_print(int *elements, int n, char *file_name){
 int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm communicator){
     //Add MPI standard commands to use send and recv
     int rank, size;
+    int elements_per_process;
 	MPI_Comm_size(communicator, &size);
-	MPI_Comm_rank(communicator, &rank);
+	MPI_Comm_rank(communicator, &rank);7
+    int first = rank*num_steps/size;
+	int last;
+    int i;
+	if (rank!=size-1) {
+		last = (rank+1)*num_steps/size-1;
+	} else {
+		last = num_steps-1;
+	}
+    
+    int length = last-first;
+
+    //allocate
+    my_elements = malloc(length*sizeof(int));
+
+    //Add distribution!!!
+    
 	return MPI_Scatter(&all_elements, n/size, MPI_INT, my_elements, n/size, MPI_INT, 0, communicator);
 }
 
