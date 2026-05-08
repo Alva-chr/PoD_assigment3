@@ -381,30 +381,18 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
         break;
     }
 
-    //binary research implmented as in geeks for geeks, see refrence in report and the link below
-    //https://www.geeksforgeeks.org/c/c-program-for-binary-search-recursive-and-iterative/
-    int left=0,right=elements_per_process;
-
-    while (left <= right){
-        // calculating mid point
-        int mid = left + (right - left) / 2;
-
-        // Check if key is present at mid
-        if (process_memory[mid] == target_number){
-            idx = mid;
+    //linear search
+    // we did actually try to implement binary search but the target_number may not be in
+    // in all process so it failed and we did not know how to solve it
+    for(int i = 0; i <elements_per_process;i++){
+        if(process_memory[i] > target_number){
+            idx = i-1;
         }
-
-        // If key greater than arr[mid], ignore left half
-        if (process_memory[mid] < target_number){
-            left = mid + 1;
-        }
-
-        // If key is smaller than or equal to arr[mid],
-        // ignore right half
-        else{
-            right = mid - 1;
+        else if(process_memory[i]== target_number){
+            idx = i;
         }
     }
+    
     return idx;
 }
 
