@@ -80,6 +80,8 @@ int main(int argc, char **argv) {
     // Outputting results and checking success
     check_and_print(output,num_values, output_name);
 
+    if (rank==0) printf("\nCheck and Print is over\n");
+
 
 	MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
@@ -158,7 +160,7 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
     int rank, size;
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);
-    
+
     int *length_list = malloc(size*sizeof(int));
     int *displacement_list = malloc(size*sizeof(int));
     int sum = 0;
@@ -187,6 +189,7 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
     free(length_list);
     free(displacement_list);
     
+    
     return my_length;
 }
 
@@ -194,9 +197,31 @@ void gather_on_root(int *all_elements, int *my_elements, int local_n, MPI_Comm c
     int rank, size;
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);
+
+    int *receive_list = NULL;
+    int *displacement_list = NULL;
     
-    int *length_list = malloc(size*sizeof(int));
-    int *displacement_list = malloc(size*sizeof(int));
+    if (rank==0){
+        receive_list = malloc(size*sizeof(int));
+        displacement_list = malloc(size*sizeof(int));
+    }
+
+    MPI_Gather(&local_n, 1, MPI_INT, receive_list, 1, MPI_INT, 0, communicator);
+
+    if (rank == 0) {
+        int sum = 0;
+        for (int i = 0; i < size; i++) {
+            displacement_list[i] = sum;
+            sum += receive_list[i];
+        }
+    }
+
+    MPI_Gatherv(my_elements, local_n, MPI_INT, all_elements, receive_list, displacement_list, MPI_INT, 0, communicator);
+
+    if (rank==0){
+        free(receive_list);
+        free(displacement_list);
+    }
 }
 
 int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy){
@@ -352,12 +377,13 @@ int sorted_ascending(int *elements, int n){
     int i;
     int res = 1;
     for (i=0; i<n; i++){
+        printf("\n%d\n",elements[i]);
         if (elements[i+1] > elements[i]){
             ;
         }
         else{
             res = 0;
-            printf("ERROR: Element %d with index %d is not smaller than element %d with index %d", elements[i], i, elements[i+1], i+1);
+            //printf("ERROR: Element %d with index %d is not smaller than element %d with index %d", elements[i], i, elements[i+1], i+1);
         }
     }
     return res;
