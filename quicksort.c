@@ -402,14 +402,14 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
     // we did actually try to implement binary search but the target_number may not be in
     // in all process so it failed and we did not know how to solve it
     for(int i = 0; i <elements_per_process;i++){
-        if(process_memory[i] > target_number){
-            idx = i-1;
-        }
-        else if(process_memory[i]== target_number){
+        if(process_memory[i] >= target_number){
             idx = i;
         }
+        else {
+            break;
+        }
     }
-    
+
     return idx;
 }
 
