@@ -354,13 +354,13 @@ void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){ //result is
 
 int sorted_ascending(int *elements, int n){
     int i;
-    int res = 1;
+    int res = 1; //set result to 1 since we want the function to return one if the array is sorted
     for (i=0; i<n-1; i++){
         //printf("\n%d\n",elements[i]);
-        if (elements[i+1] > elements[i]){
+        if (elements[i+1] >= elements[i]){ //if it is sorted do nothing
             ;
         }
-        else{
+        else{ //set to zero if the array is not sorted
             res = 0;
             //printf("ERROR: Element %d with index %d is not smaller than element %d with index %d", elements[i], i, elements[i+1], i+1);
         }
@@ -368,22 +368,22 @@ int sorted_ascending(int *elements, int n){
     return res;
 }
 
-void swap(int *e1, int *e2){
+void swap(int *e1, int *e2){ //swap pointers
     int temp = *e1;
     *e1 = *e2;
     *e2 = temp;
 }
 
 int compare(const void *v1, const void *v2){
-    return (*(int *)v1 - *(int *)v2);
+    return (*(int *)v1 - *(int *)v2); //returns a positive number if v1 is bigger, zero if equal and a negative number if v2 is bigger
 }
 
-int get_larger_index(int *elements, int n, int val){
-    int index = 0;
+int get_larger_index(int *elements, int n, int val){ //find the index of the first value larger than val
+    int index = 0; //starting index
     int i;
     for (i = 0; i < n; i++){
         if (elements[i] > val){
-            break;
+            break; //the index is found so break the for loop
         }
         index++;
     }
@@ -393,24 +393,24 @@ int get_larger_index(int *elements, int n, int val){
 int get_median(int *elements, int n){
     int median;
     if(n == 0){
-        return 0;
+        return 0; //if the array is empty
     }
     if (n%2 == 0){ //if dividable by two
         int el1 = elements[n/2-1];
         int el2 = elements[n/2];
-        median = (int)(((long long)el1 + (long long)el2)/2);
+        median = (int)(((long long)el1 + (long long)el2)/2); //calculate median for divisable with two 
     }
     else{
-        median = elements[n/2];
+        median = elements[n/2]; //calculate the median if not divisable by two
     }
     return median;
 }
 
 int select_pivot(int pivot_strategy, int *process_memory, int elements_per_process, MPI_Comm communicator){
 
-    int target_number = 50, idx = elements_per_process;
+    int target_number = 50, idx = elements_per_process; //set a starting number for the target_number and elements_per_process to avoid crashing
     // Switch statement to find the right pivot strategy
-    switch (pivot_strategy) {
+    switch (pivot_strategy) { //get element depending on pivot strategy
     case 1:
         target_number = select_pivot_median_root(process_memory, elements_per_process, communicator);
         break;
@@ -436,8 +436,8 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
 }
 
 int select_pivot_median_root(int *elements, int n, MPI_Comm communicator){
-    int median = get_median(elements,n);
-    MPI_Bcast(&median, 1, MPI_INT, 0, communicator);
+    int median = get_median(elements,n); //calculate the median
+    MPI_Bcast(&median, 1, MPI_INT, 0, communicator); //broadcast the roots median
     return median;
 }
 
@@ -457,8 +457,10 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
     //Use MPI_Reduce to sum all medians
     MPI_Reduce(&med, &sum, 1, MPI_LONG_LONG, MPI_SUM, 0, communicator);
 
+    //Broadcst the reduced sum
     MPI_Bcast(&sum, 1, MPI_LONG_LONG, 0, communicator);
 
+    //calculate the mean of all the medians
     mean_median = (int)(sum/(long long)size);
 
     return mean_median;
@@ -471,16 +473,21 @@ int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);
 
+    //allocate list for all the processes medians
     int *collected_medians = malloc(size*sizeof(int));
 
+    //calculate the median of the process
     int process_median = get_median(elements, n);
 
+    //put all the medians in the alocated list for the collected_medians
     MPI_Gather(&process_median, 1, MPI_INT, collected_medians, 1, MPI_INT ,0, communicator);
-    if(rank == 0){
+
+    if(rank == 0){ //sort these in the root process and calculate the median of this
         qsort(collected_medians, size, sizeof(int), compare);
         new_median=get_median(collected_medians, size);
     }
 
+    //Broadcast the median of all the medians
     MPI_Bcast(&new_median, 1, MPI_INT, 0, communicator);
 
     return new_median;
