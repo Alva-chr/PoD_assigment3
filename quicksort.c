@@ -456,8 +456,6 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
     for(int i = 0; i <elements_per_process;i++){
         if(process_memory[i] >= target_number){
             idx = i;
-        }
-        else {
             break;
         }
     }
