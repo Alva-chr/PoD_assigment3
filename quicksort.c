@@ -165,45 +165,48 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
 
     int my_length = length_list[rank];
 	
-    //allocate
+    //allocate elements
     *my_elements = malloc(my_length*sizeof(int));
 
-    //Distribution
+    //Distribution using scatterv since different lengths
     MPI_Scatterv(all_elements, length_list, displacement_list, MPI_INT, *my_elements, my_length, MPI_INT, 0, communicator);
 
+    //free allocations
     free(length_list);
     free(displacement_list);
     
-    
-    return my_length;
+    return my_length; //return the length of this process list
 }
 
 void gather_on_root(int *all_elements, int *my_elements, int local_n, MPI_Comm communicator){
+    //initialize MPI
     int rank, size;
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);
 
+    //initialize lists
     int *receive_list = NULL;
     int *displacement_list = NULL;
     
-    if (rank==0){
+    if (rank==0){ //allocate for root process
         receive_list = malloc(size*sizeof(int));
         displacement_list = malloc(size*sizeof(int));
     }
 
-    MPI_Gather(&local_n, 1, MPI_INT, receive_list, 1, MPI_INT, 0, communicator);
+    MPI_Gather(&local_n, 1, MPI_INT, receive_list, 1, MPI_INT, 0, communicator); //gather the lengths to the root process in thee allocated list
 
     if (rank == 0) {
         int sum = 0;
         for (int i = 0; i < size; i++) {
-            displacement_list[i] = sum;
+            displacement_list[i] = sum; //set indexes
             sum += receive_list[i];
         }
     }
 
+    //Use gatherv to gather the lists to root since they have different lenghts
     MPI_Gatherv(my_elements, local_n, MPI_INT, all_elements, receive_list, displacement_list, MPI_INT, 0, communicator);
 
-    if (rank==0){
+    if (rank==0){ //free allocated memory
         free(receive_list);
         free(displacement_list);
     }
@@ -217,23 +220,30 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     MPI_Request req;
     MPI_Status status;
 
+    // smallest case
     if (size==1){
         return n;
     }
 
-    int pivot = select_pivot(pivot_strategy,*elements,n,communicator);
+    // get pivot element, this is the index after the pivot element
+    int pivot = select_pivot(pivot_strategy, *elements, n, communicator);
 
+    // allocate two lists in order to split up the arry
     int *v1 = malloc((pivot)*sizeof(int));
     int *v2 = malloc((n-pivot)*sizeof(int));
 
+    // fill these arrays
     for (int i = 0; i<pivot;i++) {
         v1[i] = (*elements)[i];
     }
     for (int i = pivot;i<n;i++) {
         v2[i-pivot] = (*elements)[i];
     }
+
+    // get length of v2
     int len2 = n-pivot;
 
+    //initialize variables for sorting
     int *vGot;
     int *result;
     int lengot = 0;
