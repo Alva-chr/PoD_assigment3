@@ -258,6 +258,7 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         MPI_Send(&len2, 1, MPI_INT, size/2+rank, 10, communicator);
         MPI_Wait(&req, &status);
 
+        //allocate the array the process is recieving
         vGot = malloc(lengot*sizeof(int));
 
         //exchange arrays
@@ -265,11 +266,12 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         MPI_Send(v2, len2, MPI_INT, size/2+rank, 20, communicator);
         MPI_Wait(&req, &status);
 
+        //Get length of the merged array
         resultLength = pivot+lengot;
 
-        //merge arrays using merge_ascending
-        result = malloc(resultLength*sizeof(int));
+        result = malloc(resultLength*sizeof(int)); //allocate the result
 
+        //merge arrays using merge_ascending
         merge_ascending(v1, pivot, vGot, lengot, result);
     } else {
         //send v1
@@ -280,6 +282,7 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         MPI_Send(&pivot, 1, MPI_INT, rank-size/2, 10, communicator); //pivot since length of v1 = pivot
         MPI_Wait(&req, &status);
 
+        //allocate the array the process is recieving
         vGot = malloc(lengot*sizeof(int));
 
         //exchange arrays
@@ -287,19 +290,22 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         MPI_Send(v1, pivot, MPI_INT, rank-size/2, 20, communicator);
         MPI_Wait(&req, &status);
 
+        //Get length of the merged array
         resultLength = len2+lengot;
 
-        //merge arrays using merge_ascending
         result = malloc(resultLength*sizeof(int));
 
+        //merge arrays using merge_ascending
         merge_ascending(vGot, lengot, v2, len2, result);
     }
 
     int color = rank / (size / 2); // Determine color based on row
 
+    //Split the communicator into two groups
     MPI_Comm newcomm;
     MPI_Comm_split(communicator, color, rank, &newcomm);
 
+    //call global_sort recursively
     int newLength = global_sort(&result,resultLength,newcomm,pivot_strategy);
     
     free(*elements);
@@ -309,6 +315,8 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     free(v1);
     free(v2);
     free(vGot);
+
+    MPI_Comm_free(&newcomm);
 
     return newLength;
 }
