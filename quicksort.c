@@ -82,6 +82,10 @@ int main(int argc, char **argv) {
 
     if (rank==0) printf("\nCheck and Print is over\n");
 
+    // if (rank==0) {
+    //     for (int i = 0;i<memory_length) {}
+    // }
+
 
 
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -145,7 +149,7 @@ int check_and_print(int *elements, int n, char *file_name){
         if (sorted == 0){
 			printf("Error: The list is not sorted.\n");
         }
-        if (sorted == 1){
+        else if (sorted == 1){
             printf("List is sorted.\n");
         }
         else{
