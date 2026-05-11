@@ -495,6 +495,7 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
 int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
     //Add MPI standard commands to use send and recv
     int rank, size;
+    int new_median;
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);
 
@@ -503,7 +504,12 @@ int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
     int process_median = get_median(elements, n);
 
     MPI_Gather(&process_median, 1, MPI_INT, &collected_medians, 1, MPI_DOUBLE,0, communicator);
-    qsort(&collected_medians, size, sizeof(int), compare);
+    if(rank == 0){
+        qsort(&collected_medians, size, sizeof(int), compare);
+        new_median=get_median(collected_medians, size);
+    }
 
-    return get_median(collected_medians, size);
+    MPI_Bcast(&new_median, 1, MPI_INT, 0, communicator);
+
+    return new_median;
 }
