@@ -384,6 +384,9 @@ int get_larger_index(int *elements, int n, int val){
 
 int get_median(int *elements, int n){
     int median;
+    if(n == 0){
+        return 0
+    }
     if (n%2 == 0){ //if dividable by two
         int el1 = elements[n/2-1];
         int el2 = elements[n/2];
