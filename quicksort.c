@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     
     //print execution time
     if(rank==0){
-        printf("%f", my_execution_time);
+        printf("Wall time: %f\n", my_execution_time);
     }
 
     free(process_memory); //free the process memory
@@ -421,9 +421,6 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
         target_number = select_pivot_median_median(process_memory, elements_per_process, communicator);
         break;
     }
-    int rank;
-	MPI_Comm_rank(communicator, &rank);
-    printf("rank %d: target_number %d\n",rank,target_number);
 
     //linear search
     // we did actually try to implement binary search but the target_number may not be in
