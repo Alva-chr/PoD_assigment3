@@ -503,9 +503,9 @@ int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
 
     int process_median = get_median(elements, n);
 
-    MPI_Gather(&process_median, 1, MPI_INT, &collected_medians, 1, MPI_DOUBLE,0, communicator);
+    MPI_Gather(&process_median, 1, MPI_INT, collected_medians, 1, MPI_INT ,0, communicator);
     if(rank == 0){
-        qsort(&collected_medians, size, sizeof(int), compare);
+        qsort(collected_medians, size, sizeof(int), compare);
         new_median=get_median(collected_medians, size);
     }
 
