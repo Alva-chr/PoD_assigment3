@@ -78,9 +78,10 @@ int main(int argc, char **argv) {
     if (rank==0) printf("\nGather is over\n");
 
     // Outputting results and checking success
-    check_and_print(output,num_values, output_name);
+    if (rank==0) check_and_print(output,num_values, output_name);
 
     if (rank==0) printf("\nCheck and Print is over\n");
+
 
 
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -377,7 +378,7 @@ int sorted_ascending(int *elements, int n){
     int i;
     int res = 1;
     for (i=0; i<n; i++){
-        printf("\n%d\n",elements[i]);
+        //printf("\n%d\n",elements[i]);
         if (elements[i+1] > elements[i]){
             ;
         }
