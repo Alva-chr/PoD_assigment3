@@ -87,35 +87,35 @@ int main(int argc, char **argv) {
 //Taken from assignment 2
 int read_input(char *file_name, int **elements) {
 	FILE *file;
-	if (NULL == (file = fopen(file_name, "r"))) {
+	if (NULL == (file = fopen(file_name, "r"))) { //no input file exists
 		perror("Couldn't open input file");
 		return -1;
 	}
-	int num_values;
+	int num_values; //initialize number of values to then get it from the input file
 	if (EOF == fscanf(file, "%d", &num_values)) {
 		perror("Couldn't read element count from input file");
 		return -1;
 	}
-	if (NULL == (*elements = malloc(num_values * sizeof(double)))) {
+	if (NULL == (*elements = malloc(num_values * sizeof(double)))) { //the memory cannot be allocated
 		perror("Couldn't allocate memory for input");
 		return -1;
 	}
-	for (int i=0; i<num_values; i++) {
+	for (int i=0; i<num_values; i++) { //read elements from the input file
 		if (EOF == fscanf(file, "%d", &((*elements)[i]))) {
 			perror("Couldn't read elements from input file");
 			return -1;
 		}
 	}
-	if (0 != fclose(file)){
+	if (0 != fclose(file)){ //make sure the input file is closed
 		perror("Warning: couldn't close input file");
 	}
-	return num_values;
+	return num_values; //return number of values in the input file
 }
 
 int check_and_print(int *elements, int n, char *file_name){
-    int i;
+    int i; //initialize i
 
-    FILE *fp = fopen(file_name, "w");
+    FILE *fp = fopen(file_name, "w"); //open output file
 	if (fp == NULL) {
         printf("Error opening file.\n");
         return -2;
@@ -123,9 +123,9 @@ int check_and_print(int *elements, int n, char *file_name){
 
     for (i = 0; i < n; i++)
 		fprintf(fp, "%d\t", elements[i]);
-        int sorted = sorted_ascending(elements, n);
+        int sorted = sorted_ascending(elements, n); //check sorting with help of sorted_ascending which outputs 1 or 0 depending on if the list is sorted
         if (sorted == 0){
-			printf("Error: The list is not sorted.\n");
+			printf("Error: The list is not sorted.\n"); 
         }
         else if (sorted == 1){
             printf("List is sorted.\n");
@@ -134,21 +134,23 @@ int check_and_print(int *elements, int n, char *file_name){
             printf("Error: Issue checking the sorting of the list.\n");
         }
 
-    fclose(fp);
+    fclose(fp); //close the file
 
 	return 0;
 }
 
 int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm communicator){
+    //initialize MPI parameters
     int rank, size;
 	MPI_Comm_size(communicator, &size);
 	MPI_Comm_rank(communicator, &rank);
 
-    int *length_list = malloc(size*sizeof(int));
-    int *displacement_list = malloc(size*sizeof(int));
+    //Allocate memory
+    int *length_list = malloc(size*sizeof(int)); //number of elements in each process
+    int *displacement_list = malloc(size*sizeof(int)); //indexes
     int sum = 0;
 
-    for (int loop_rank = 0;loop_rank<size;loop_rank++){
+    for (int loop_rank = 0; loop_rank<size; loop_rank++){ //decide starting and ending indexes for each process
         int first = loop_rank*n/size;
         int last;
         if (loop_rank!=size-1) {
@@ -156,7 +158,7 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
         } else {
             last = n;
         }
-        length_list[loop_rank] = last-first;
+        length_list[loop_rank] = last-first; 
         displacement_list[loop_rank] = sum;
         sum += last-first;
     }
