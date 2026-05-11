@@ -52,11 +52,8 @@ int main(int argc, char **argv) {
 
 	MPI_Bcast(&num_values, 1, MPI_INT, root, MPI_COMM_WORLD);
 
-	//Allocating memory for each process
-	/*if (NULL == (process_memory = malloc(elements_per_process* sizeof(int)))) {
-		perror("Couldn't allocate memory for process memory");
-		return 2;
-	}*/
+    MPI_Barrier(MPI_COMM_WORLD);
+    double start = MPI_Wtime();
 
 
 	int memory_length = distribute_from_root(input, num_values, &process_memory, MPI_COMM_WORLD);
@@ -64,46 +61,23 @@ int main(int argc, char **argv) {
     // Local sorting
 	qsort(process_memory,memory_length, sizeof(int), compare);
 
-    if (rank==0) {
-        for (int i = 0;i<memory_length;i++) {
-            printf("Rank %d:  %d\n",rank,process_memory[i]);
-        }
-    }
-
     // Global Sort Algorithm
     memory_length = global_sort(&process_memory,memory_length,MPI_COMM_WORLD,pivot_strategy);
-
-    if (rank==0) printf("\nGlobal sort is over\n");
-
 
     // Assembling sorted lists
     gather_on_root(output, process_memory, memory_length, MPI_COMM_WORLD);
 
-    if (rank==0) printf("\nGather is over\n");
-
     // Outputting results and checking success
     if (rank==0) check_and_print(output,num_values, output_name);
-
-    if (rank==0) printf("\nCheck and Print is over\n");
-
-    // if (rank==0) {
-    //     for (int i = 0;i<memory_length) {}
-    // }
-
-
-
-	MPI_Barrier(MPI_COMM_WORLD);
-    double start = MPI_Wtime();
-
-    //lägg till kod för att lösa problemet här
-
 
     //Time taken for each process and using the slowest
     double my_execution_time = MPI_Wtime() - start;
 	double max_execution_time = 0;
 
-
 	MPI_Reduce(&my_execution_time, &max_execution_time, 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD);
+    
+    //print execution time
+    printf("%f", my_execution_time);
 
     free(process_memory);
 
@@ -241,19 +215,11 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     MPI_Request req;
     MPI_Status status;
 
-    if (rank==0) printf("\n0\n");
-
     if (size==1){
         return n;
     }
 
-    if (rank==0) printf("\n1\n");
-
     int pivot = select_pivot(pivot_strategy,*elements,n,communicator);
-
-    if (rank==0) printf("\n%d\n",pivot);
-
-    if (rank==0) printf("\n2\n");
 
     int *v1 = malloc((pivot)*sizeof(int));
     int *v2 = malloc((n-pivot)*sizeof(int));
@@ -271,20 +237,14 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     int lengot;
     int resultLength;
 
-    if (rank==0) printf("\n3\n");
-
     if (rank<size/2){
         //send v2
         //recieve v1
-
-        if (rank==0) printf("\na1\n");
 
         //exchanging lengths of arrays
         MPI_Irecv(&lengot, 1, MPI_INT, size/2+rank, 10, communicator, &req);
         MPI_Send(&len2, 1, MPI_INT, size/2+rank, 10, communicator);
         MPI_Wait(&req, &status);
-
-        if (rank==0) printf("\na2\n");
 
         vGot = malloc(lengot*sizeof(int));
 
@@ -293,31 +253,20 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         MPI_Send(v2, len2, MPI_INT, size/2+rank, 20, communicator);
         MPI_Wait(&req, &status);
 
-        if (rank==0) printf("\na3\n");
-
         resultLength = pivot+lengot;
 
         //merge arrays using merge_ascending
         result = malloc(resultLength*sizeof(int));
 
-        if (rank==0) printf("\na4\n");
-
         merge_ascending(v1, pivot, vGot, lengot, result);
-
-        if (rank==0) printf("\na5\n");
     } else {
         //send v1
         //recieve v2
-
-        if (rank==1) printf("\nb1\n");
-
 
         //exchanging lengths of arrays
         MPI_Irecv(&lengot, 1, MPI_INT, rank-size/2, 10, communicator, &req);
         MPI_Send(&pivot, 1, MPI_INT, rank-size/2, 10, communicator); //pivot since length of v1 = pivot
         MPI_Wait(&req, &status);
-
-        if (rank==1) printf("\nb2\n");
 
         vGot = malloc(lengot*sizeof(int));
 
@@ -326,23 +275,13 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
         MPI_Send(v1, pivot, MPI_INT, rank-size/2, 20, communicator);
         MPI_Wait(&req, &status);
 
-        if (rank==1) printf("\nb3\n");
-
         resultLength = len2+lengot;
-
-        
 
         //merge arrays using merge_ascending
         result = malloc(resultLength*sizeof(int));
 
-        if (rank==1) printf("\nb4\n");
-
         merge_ascending(vGot, lengot, v2, len2, result);
-
-        if (rank==1) printf("\nb5\n");
     }
-
-    if (rank==0) printf("\n4\n");
 
     int color = rank / (size / 2); // Determine color based on row
 
@@ -357,7 +296,6 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     
     free(v1);
     free(v2);
-    //free(result);
     free(vGot);
 
     return newLength;
