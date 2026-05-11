@@ -362,24 +362,35 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     return newLength;
 }
 
-void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
+void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){ //result is allocated before this function
+    //initialize needed parameters
     int n = n1 + n2;
     int i;
     int i1 = 0;
     int i2 = 0;
-    for(i=0; i < n; i++){
-        if (v1[i1] < v2[i2]){
+
+    while (i1 < n1 && i2 < n2){ //if both v1 and v2 have values to add to the new list result
+        if (v1[i1] < v2[i2]){ //if v1 is smaller than v2 add v1 to the list and move a step in v1
             result[i] = v1[i1];
             i1++;
         }
-        else if(v1[i1] == v2[i2]){
-            result[i] = v1[i1];
-            i1++;
-        }
-        else{
+        else{ //otherwise add v2 to the list and move a step in v2
             result[i] = v2[i2];
             i2++;
         }
+        i++; //move a step in result
+    }
+
+    while (i1 < n1){ //if v2 is all added to the list add the rest of v1
+        result[i] = v1[i1];
+        i1++;
+        i++;
+    }
+
+    while (i1 < n1){ //if v1 is all added to the list add the rest of v2
+        result[i] = v2[i2];
+        i2++;
+        i++;
     }
 }
 
