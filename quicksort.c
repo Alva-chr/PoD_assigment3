@@ -400,7 +400,7 @@ int get_median(int *elements, int n){
 
 int select_pivot(int pivot_strategy, int *process_memory, int elements_per_process, MPI_Comm communicator){
 
-    int target_number = 50, idx = 1;
+    int target_number = 50, idx = elements_per_process;
     // Switch statement to find the right pivot strategy
     switch (pivot_strategy) {
     case 1:
@@ -452,7 +452,7 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
     //Use MPI_Reduce to sum all medians
     MPI_Reduce(&med, &sum, 1, MPI_LONG_LONG, MPI_SUM, 0, communicator);
 
-    MPI_Bcast(&sum, 1, MPI_INT, 0, communicator);
+    MPI_Bcast(&sum, 1, MPI_LONG_LONG, 0, communicator);
 
     mean_median = (int)(sum/(long long)size);
 
