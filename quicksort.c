@@ -96,7 +96,7 @@ int read_input(char *file_name, int **elements) {
 		perror("Couldn't read element count from input file");
 		return -1;
 	}
-	if (NULL == (*elements = malloc(num_values * sizeof(double)))) { //the memory cannot be allocated
+	if (NULL == (*elements = malloc(num_values * sizeof(int)))) { //the memory cannot be allocated
 		perror("Couldn't allocate memory for input");
 		return -1;
 	}
@@ -236,7 +236,7 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
 
     int *vGot;
     int *result;
-    int lengot;
+    int lengot = 0;
     int resultLength;
 
     if (rank<size/2){
