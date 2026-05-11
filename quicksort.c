@@ -385,12 +385,12 @@ int get_larger_index(int *elements, int n, int val){
 int get_median(int *elements, int n){
     int median;
     if(n == 0){
-        return 0
+        return 0;
     }
     if (n%2 == 0){ //if dividable by two
         int el1 = elements[n/2-1];
         int el2 = elements[n/2];
-        median = (int)(((long int)el1 + (long int)el2)/2);
+        median = (int)(((long long)el1 + (long long)el2)/2);
     }
     else{
         median = elements[n/2];
@@ -443,18 +443,18 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
 	MPI_Comm_rank(communicator, &rank);
 
     //get median for my process
-    long int med = (long int)get_median(elements, n);
+    long long med = (long long)get_median(elements, n);
 
     //initialize sum and mean_median
-    long int sum;
+    long long sum;
     int mean_median = med;
 
     //Use MPI_Reduce to sum all medians
-    MPI_Reduce(&med, &sum, 1, MPI_LONG_INT, MPI_SUM, 0, communicator);
+    MPI_Reduce(&med, &sum, 1, MPI_LONG_LONG, MPI_SUM, 0, communicator);
 
     MPI_Bcast(&sum, 1, MPI_INT, 0, communicator);
 
-    mean_median = (int)(sum/(long int)size);
+    mean_median = (int)(sum/(long long)size);
 
     return mean_median;
 }
