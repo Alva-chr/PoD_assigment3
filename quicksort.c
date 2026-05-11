@@ -8,21 +8,17 @@
 
 int main(int argc, char **argv) {
 
-    
-
-	if (4 != argc) {
+	if (4 != argc) { //make sure the code is used correctly
 		printf("Usage: quicksort input_file output_file pivot_strategy\n");
 		return 1;
 	}
-
 
     //collecting input data
 	char *input_name = argv[1];
 	char *output_name = argv[2];
 	int pivot_strategy = atoi(argv[3]); // 
 
-
-	const int root = 0;
+	const int root = 0; //set root process
 	int rank, size;
 
     //Setting up MPI
@@ -30,41 +26,42 @@ int main(int argc, char **argv) {
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	int *input = NULL; //So that each process 
+    //initialize input and output for each process
+	int *input = NULL;
 	int *output = NULL;
 	int num_values;
     
 
 	//Only the the process with rank 0 will read in the full input file
 	if(rank == root){
-		if (0 > (num_values = read_input(input_name, &input))) {
+		if (0 > (num_values = read_input(input_name, &input))) { //read input
 			perror("Couldn't read input");
 			return 2;
 		}
-        //elements_per_process = num_values/size;
-		if (NULL == (output = malloc(num_values*sizeof(int)))) {
+		if (NULL == (output = malloc(num_values*sizeof(int)))) { //allocate output
 			perror("Couldn't allocate memory for output");
 			return 2;
 		}
 	}
 
-	int *process_memory;
+	int *process_memory; //initialize the memory for each process
 
-	MPI_Bcast(&num_values, 1, MPI_INT, root, MPI_COMM_WORLD);
+	MPI_Bcast(&num_values, 1, MPI_INT, root, MPI_COMM_WORLD); //Broadcast the length of the input to all processes from the root process
 
+    //start timer
     MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
 
-
+    //get length of each process array using distribute_from_root
 	int memory_length = distribute_from_root(input, num_values, &process_memory, MPI_COMM_WORLD);
 
     // Local sorting
 	qsort(process_memory,memory_length, sizeof(int), compare);
 
-    // Global Sort Algorithm
+    // Global Sort Algorithm to get new length
     memory_length = global_sort(&process_memory,memory_length,MPI_COMM_WORLD,pivot_strategy);
 
-    // Assembling sorted lists
+    // Assembling sorted lists using gather_on_root
     gather_on_root(output, process_memory, memory_length, MPI_COMM_WORLD);
 
     // Outputting results and checking success
@@ -74,14 +71,17 @@ int main(int argc, char **argv) {
     double my_execution_time = MPI_Wtime() - start;
 	double max_execution_time = 0;
 
+    //Take the slowest execution time
 	MPI_Reduce(&my_execution_time, &max_execution_time, 1, MPI_DOUBLE, MPI_MAX, root, MPI_COMM_WORLD);
     
     //print execution time
-    printf("%f", my_execution_time);
+    if(rank==0){
+        printf("%f", my_execution_time);
+    }
 
-    free(process_memory);
+    free(process_memory); //free the process memory
 
-    MPI_Finalize(); 
+    MPI_Finalize(); //end MPI
 }
 
 //Taken from assignment 2
