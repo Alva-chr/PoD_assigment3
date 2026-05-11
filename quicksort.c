@@ -387,7 +387,7 @@ int get_median(int *elements, int n){
     if (n%2 == 0){ //if dividable by two
         int el1 = elements[n/2-1];
         int el2 = elements[n/2];
-        median = (el1 + el2)/2;
+        median = (int)(((long int)el1 + (long int)el2)/2);
     }
     else{
         median = elements[n/2];
@@ -410,6 +410,9 @@ int select_pivot(int pivot_strategy, int *process_memory, int elements_per_proce
         target_number = select_pivot_median_median(process_memory, elements_per_process, communicator);
         break;
     }
+    int rank;
+	MPI_Comm_rank(communicator, &rank);
+    printf("rank %d: target_number %d\n",rank,target_number);
 
     //linear search
     // we did actually try to implement binary search but the target_number may not be in
@@ -437,18 +440,18 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
 	MPI_Comm_rank(communicator, &rank);
 
     //get median for my process
-    int med = get_median(elements, n);
+    long int med = (long int)get_median(elements, n);
 
     //initialize sum and mean_median
-    int sum;
+    long int sum;
     int mean_median = med;
 
     //Use MPI_Reduce to sum all medians
-    MPI_Reduce(&med, &sum, 1, MPI_INT, MPI_SUM, 0, communicator);
+    MPI_Reduce(&med, &sum, 1, MPI_LONG_INT, MPI_SUM, 0, communicator);
 
     MPI_Bcast(&sum, 1, MPI_INT, 0, communicator);
 
-    mean_median = sum/size;
+    mean_median = (int)(sum/(long int)size);
 
     return mean_median;
 }
