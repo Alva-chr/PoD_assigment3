@@ -385,7 +385,7 @@ void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){ //result is
         i++;
     }
 
-    while (i1 < n1){ //if v1 is all added to the list add the rest of v2
+    while (i2 < n2){ //if v1 is all added to the list add the rest of v2
         result[i] = v2[i2];
         i2++;
         i++;
