@@ -147,7 +147,7 @@ int check_and_print(int *elements, int n, char *file_name){
         return -2;
     }
 
-    for (i = 1; i < n; i++)
+    for (i = 0; i < n; i++)
 		fprintf(fp, "%d\t", elements[i]);
         int sorted = sorted_ascending(elements, n);
         if (sorted == 0){
@@ -351,11 +351,13 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
 
     int newLength = global_sort(&result,resultLength,newcomm,pivot_strategy);
     
-    swap(*elements, result);
+    free(*elements);
+
+    *elements = result;
     
     free(v1);
     free(v2);
-    free(result);
+    //free(result);
     free(vGot);
 
     return newLength;
@@ -395,7 +397,7 @@ void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){ //result is
 int sorted_ascending(int *elements, int n){
     int i;
     int res = 1;
-    for (i=0; i<n; i++){
+    for (i=0; i<n-1; i++){
         //printf("\n%d\n",elements[i]);
         if (elements[i+1] > elements[i]){
             ;
