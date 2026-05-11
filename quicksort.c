@@ -24,7 +24,6 @@ int main(int argc, char **argv) {
 
 	const int root = 0;
 	int rank, size;
-	MPI_Status status;
 
     //Setting up MPI
 	MPI_Init(&argc, &argv);
@@ -364,8 +363,7 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
 
 void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){ //result is allocated before this function
     //initialize needed parameters
-    int n = n1 + n2;
-    int i;
+    int i = 0;
     int i1 = 0;
     int i2 = 0;
 
