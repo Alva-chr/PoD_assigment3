@@ -362,7 +362,7 @@ void merge_ascending(int *v1, int n1, int *v2, int n2, int *result){
     int i;
     int i1 = 0;
     int i2 = 0;
-    for(i; i < n; i++){
+    for(i=0; i < n; i++){
         if (v1[i1] < v2[i2]){
             result[i] = v1[i1];
             i1++;
@@ -441,7 +441,7 @@ int get_median(int *elements, int n){
 
 int select_pivot(int pivot_strategy, int *process_memory, int elements_per_process, MPI_Comm communicator){
 
-    int target_number, idx = -1;
+    int target_number = 50, idx = 1;
     // Switch statement to find the right pivot strategy
     switch (pivot_strategy) {
     case 1:
@@ -487,14 +487,14 @@ int select_pivot_mean_median(int *elements, int n, MPI_Comm communicator){
 
     //initialize sum and mean_median
     int sum;
-    int mean_median;
+    int mean_median = med;
 
     //Use MPI_Reduce to sum all medians
     MPI_Reduce(&med, &sum, 1, MPI_INT, MPI_SUM, 0, communicator);
 
-    if(rank==0){
-        mean_median = sum/size;
-    }
+    MPI_Bcast(&sum, 1, MPI_INT, 0, communicator);
+
+    mean_median = sum/size;
 
     return mean_median;
 }
