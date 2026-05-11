@@ -65,6 +65,11 @@ int main(int argc, char **argv) {
     // Local sorting
 	qsort(process_memory,memory_length, sizeof(int), compare);
 
+    if (rank==0) {
+        for (int i = 0;i<memory_length;i++) {
+            printf("Rank %d:  %d\n",rank,process_memory[i]);
+        }
+    }
 
     // Global Sort Algorithm
     memory_length = global_sort(&process_memory,memory_length,MPI_COMM_WORLD,pivot_strategy);
@@ -401,17 +406,7 @@ void swap(int *e1, int *e2){
 }
 
 int compare(const void *v1, const void *v2){
-    int res;
-    if (v1 == v2){
-        res = 0;
-    }
-    else if (v1 > v2){
-        res = 1;
-    }
-    else{
-        res = -1;
-    }
-    return res;
+    return (*(int *)v1 - *(int *)v2);
 }
 
 int get_larger_index(int *elements, int n, int val){
