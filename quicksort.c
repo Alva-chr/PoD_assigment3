@@ -153,10 +153,10 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
     int sum = 0;
 
     for (int loop_rank = 0; loop_rank<size; loop_rank++){ //decide starting and ending indexes for each process
-        int first = loop_rank*n/size;
+        int first = (int)(((long long)loop_rank*(long long)n)/size);
         int last;
         if (loop_rank!=size-1) {
-            last = (loop_rank+1)*n/size;
+            last = (int)(((long long)loop_rank+1)*(long long)n)/size;
         } else {
             last = n;
         }
