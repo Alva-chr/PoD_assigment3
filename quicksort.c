@@ -44,13 +44,13 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	int *process_memory; //initialize the memory for each process
-
-	MPI_Bcast(&num_values, 1, MPI_INT, root, MPI_COMM_WORLD); //Broadcast the length of the input to all processes from the root process
-
     //start timer
     MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
+
+	int *process_memory; //initialize the memory for each process
+
+	MPI_Bcast(&num_values, 1, MPI_INT, root, MPI_COMM_WORLD); //Broadcast the length of the input to all processes from the root process
 
     //get length of each process array using distribute_from_root
 	int memory_length = distribute_from_root(input, num_values, &process_memory, MPI_COMM_WORLD);
@@ -64,8 +64,7 @@ int main(int argc, char **argv) {
     // Assembling sorted lists using gather_on_root
     gather_on_root(output, process_memory, memory_length, MPI_COMM_WORLD);
 
-    // Outputting results and checking success
-    if (rank==0) check_and_print(output,num_values, output_name);
+    
 
     //Time taken for each process and using the slowest
     double my_execution_time = MPI_Wtime() - start;
@@ -78,6 +77,9 @@ int main(int argc, char **argv) {
     if(rank==0){
         printf("Wall time: %f\n", my_execution_time);
     }
+
+    // Outputting results and checking success
+    if (rank==0) check_and_print(output,num_values, output_name);
 
     free(process_memory); //free the process memory
 
