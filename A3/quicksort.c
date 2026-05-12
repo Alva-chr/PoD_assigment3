@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
     
     //print execution time
     if(rank==0){
-        printf("Wall time: %f\n", my_execution_time);
+        printf("%f\n", my_execution_time);
     }
 
     // Outputting results and checking success
@@ -115,7 +115,7 @@ int read_input(char *file_name, int **elements) {
 }
 
 int check_and_print(int *elements, int n, char *file_name){
-    //int i; //initialize i
+    int i; //initialize i
 
     FILE *fp = fopen(file_name, "w"); //open output file
 	if (fp == NULL) {
@@ -123,16 +123,10 @@ int check_and_print(int *elements, int n, char *file_name){
         return -2;
     }
 
-    //for (i = 0; i < n; i++)fprintf(fp, "%d\t", elements[i]);
+    for (i = 0; i < n; i++)fprintf(fp, "%d\t", elements[i]);
         int sorted = sorted_ascending(elements, n); //check sorting with help of sorted_ascending which outputs 1 or 0 depending on if the list is sorted
         if (sorted == 0){
 			printf("Error: The list is not sorted.\n"); 
-        }
-        else if (sorted == 1){
-            printf("List is sorted.\n");
-        }
-        else{
-            printf("Error: Issue checking the sorting of the list.\n");
         }
 
     fclose(fp); //close the file

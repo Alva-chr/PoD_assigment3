@@ -1,0 +1,113 @@
+Benchmark Results - Tue May 12 02:57:09 PM CEST 2026
+------------------------------------------------
+FILE: input125000000.txt
+PARAMS: File=input125000000.txt, Procs=16, Strategy=1
+Wall time: 1.629678
+List is sorted.
+Wall time: 1.368266
+List is sorted.
+------------------------------------
+PARAMS: File=input125000000.txt, Procs=16, Strategy=2
+Wall time: 1.419417
+List is sorted.
+Wall time: 1.352343
+List is sorted.
+------------------------------------
+PARAMS: File=input125000000.txt, Procs=16, Strategy=3
+Wall time: 1.355070
+List is sorted.
+Wall time: 1.372705
+List is sorted.
+------------------------------------
+PARAMS: File=input125000000.txt, Procs=32, Strategy=1
+Wall time: 0.784184
+List is sorted.
+Wall time: 0.787184
+List is sorted.
+------------------------------------
+PARAMS: File=input125000000.txt, Procs=32, Strategy=2
+Wall time: 0.792498
+List is sorted.
+Wall time: 0.826599
+List is sorted.
+------------------------------------
+PARAMS: File=input125000000.txt, Procs=32, Strategy=3
+Wall time: 0.818016
+List is sorted.
+Wall time: 1.009907
+List is sorted.
+------------------------------------
+FILE: input250000000.txt
+PARAMS: File=input250000000.txt, Procs=16, Strategy=1
+Wall time: 3.195680
+List is sorted.
+Wall time: 5.520805
+List is sorted.
+------------------------------------
+PARAMS: File=input250000000.txt, Procs=16, Strategy=2
+Wall time: 3.015729
+List is sorted.
+Wall time: 2.993091
+List is sorted.
+------------------------------------
+PARAMS: File=input250000000.txt, Procs=16, Strategy=3
+Wall time: 2.971150
+List is sorted.
+Wall time: 2.965630
+List is sorted.
+------------------------------------
+PARAMS: File=input250000000.txt, Procs=32, Strategy=1
+Wall time: 1.766169
+List is sorted.
+Wall time: 1.730902
+List is sorted.
+------------------------------------
+PARAMS: File=input250000000.txt, Procs=32, Strategy=2
+Wall time: 1.684219
+List is sorted.
+Wall time: 1.740411
+List is sorted.
+------------------------------------
+PARAMS: File=input250000000.txt, Procs=32, Strategy=3
+Wall time: 1.695338
+List is sorted.
+Wall time: 1.752290
+List is sorted.
+------------------------------------
+FILE: input500000000.txt
+PARAMS: File=input500000000.txt, Procs=16, Strategy=1
+Wall time: 7.082452
+List is sorted.
+Wall time: 6.984746
+List is sorted.
+------------------------------------
+PARAMS: File=input500000000.txt, Procs=16, Strategy=2
+Wall time: 7.320235
+List is sorted.
+Wall time: 7.178555
+List is sorted.
+------------------------------------
+PARAMS: File=input500000000.txt, Procs=16, Strategy=3
+Wall time: 7.463244
+List is sorted.
+Wall time: 8.002231
+List is sorted.
+------------------------------------
+PARAMS: File=input500000000.txt, Procs=32, Strategy=1
+Wall time: 5.695872
+List is sorted.
+Wall time: 5.743468
+List is sorted.
+------------------------------------
+PARAMS: File=input500000000.txt, Procs=32, Strategy=2
+Wall time: 5.709566
+List is sorted.
+Wall time: 5.847807
+List is sorted.
+------------------------------------
+PARAMS: File=input500000000.txt, Procs=32, Strategy=3
+Wall time: 5.728278
+List is sorted.
+Wall time: 5.773059
+List is sorted.
+------------------------------------

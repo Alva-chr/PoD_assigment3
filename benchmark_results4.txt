@@ -1,0 +1,39 @@
+Benchmark Results - Tue May 12 03:31:25 PM CEST 2026
+------------------------------------------------
+FILE: input500000000.txt
+PARAMS: File=input500000000.txt, Procs=8, Strategy=1
+Wall time: 22.915050
+List is sorted.
+Wall time: 22.513437
+List is sorted.
+Wall time: 23.239823
+List is sorted.
+Wall time: 24.828044
+List is sorted.
+Wall time: 22.278245
+List is sorted.
+------------------------------------
+PARAMS: File=input500000000.txt, Procs=8, Strategy=2
+Wall time: 22.665641
+List is sorted.
+Wall time: 24.883861
+List is sorted.
+Wall time: 24.538280
+List is sorted.
+Wall time: 25.343510
+List is sorted.
+Wall time: 25.888281
+List is sorted.
+------------------------------------
+PARAMS: File=input500000000.txt, Procs=8, Strategy=3
+Wall time: 26.534811
+List is sorted.
+Wall time: 24.387589
+List is sorted.
+Wall time: 24.970099
+List is sorted.
+Wall time: 24.829444
+List is sorted.
+Wall time: 25.777685
+List is sorted.
+------------------------------------
