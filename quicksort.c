@@ -153,16 +153,16 @@ int distribute_from_root(int *all_elements, int n, int **my_elements, MPI_Comm c
     int sum = 0;
 
     for (int loop_rank = 0; loop_rank<size; loop_rank++){ //decide starting and ending indexes for each process
-        int first = (int)(((long long)loop_rank*(long long)n)/size);
+        int first = (int)(((long long)loop_rank*(long long)n)/(long long)size);
         int last;
         if (loop_rank!=size-1) {
-            last = (int)(((long long)loop_rank+1)*(long long)n)/size;
+            last = (int)((((long long)loop_rank+1)*(long long)n)/(long long)size);
         } else {
             last = n;
         }
-        length_list[loop_rank] = last-first; 
+        length_list[loop_rank] = (last-first); 
         displacement_list[loop_rank] = sum;
-        sum += last-first;
+        sum += (last-first);
     }
 
     int my_length = length_list[rank];
@@ -306,6 +306,10 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     //Split the communicator into two groups
     MPI_Comm newcomm;
     MPI_Comm_split(communicator, color, rank, &newcomm);
+    
+    free(v1);
+    free(v2);
+    free(vGot);
 
     //call global_sort recursively
     int newLength = global_sort(&result,resultLength,newcomm,pivot_strategy);
@@ -313,10 +317,6 @@ int global_sort(int **elements, int n, MPI_Comm communicator, int pivot_strategy
     free(*elements);
 
     *elements = result;
-    
-    free(v1);
-    free(v2);
-    free(vGot);
 
     MPI_Comm_free(&newcomm);
 
@@ -491,6 +491,7 @@ int select_pivot_median_median(int *elements, int n, MPI_Comm communicator){
 
     //Broadcast the median of all the medians
     MPI_Bcast(&new_median, 1, MPI_INT, 0, communicator);
+    free(collected_medians);
 
     return new_median;
 }
